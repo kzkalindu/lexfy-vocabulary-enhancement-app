@@ -13,3 +13,5 @@
 - **Push Notifications:** Personalized reminders for consistent learning.
 - **Third-Party API Integration:** Access to reliable dictionary definitions and pronunciation tips via Oxford and Merriam-Webster APIs.
 
+## **NOTE**
+- Please note that, before doing anything make sure to run a `git pull` from main branch.
