@@ -213,16 +213,8 @@
 // }
 
 
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
-import 'LeaderboardScreen.dart'; // Importing LeaderboardScreen
+import '/presentation/profile/Leaderboard_page.dart'; // Importing LeaderboardScreen
 import 'package:fl_chart/fl_chart.dart';
 
 class ProfileScreen extends StatelessWidget {
