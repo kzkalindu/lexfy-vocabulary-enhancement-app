@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -15,6 +14,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: YouTubeVideoScreen(),
+
+
     );
   }
 }
@@ -27,21 +28,66 @@ class YouTubeVideoScreen extends StatefulWidget {
 class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
   final List<Map<String, String>> videos = [
     {
-      "id": "dQw4w9WgXcQ", // Replace with actual video ID
-      "title": "Mastering English Vocabulary",
-      "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg"
+      "id": "7zUZagriZXM", // Replace with actual video ID
+      "title": "30 English grammar test practice questions with answers & explanations",
+      "thumbnail": "https://img.youtube.com/vi/7zUZagriZXM/0.jpg"
+    },
+    {
+      "id": "opKPVqxE_QY",
+      "title": "English Words You’re Probably Mispronouncing",
+      "thumbnail": "https://img.youtube.com/vi/opKPVqxE_QY/0.jpg"
+
     },
     {
 
-      "id": "3JZ_D3ELwOQ",
-      "title": "Top 10 Commonly Mispronounced Words",
-      "thumbnail": "https://img.youtube.com/vi/3JZ_D3ELwOQ/0.jpg"
+      "id": "KDpfN0TA4c4",
+      "title": "Practice Speaking & Reading Out Loud with This English Shadowing Exercise",
+      "thumbnail": "https://img.youtube.com/vi/KDpfN0TA4c4/0.jpg"
     },
     {
-      "id": "LXb3EKWsInQ",
-      "title": "Learn 100 English Words in 10 Minutes",
-      "thumbnail": "https://img.youtube.com/vi/LXb3EKWsInQ/0.jpg"
+      "id": "_KYln3kIfP8",
+
+      "title": "What is YOUR English vocabulary level? Take this test!",
+      "thumbnail": "https://img.youtube.com/vi/_KYln3kIfP8/0.jpg"
     },
+    {
+      "id": "IrNDVWXokwY",
+      "title": "What’s your English level? Take this test!",
+      "thumbnail": "https://img.youtube.com/vi/IrNDVWXokwY/0.jpg"
+    },
+    {
+      "id": "9bZkp7q19f0",
+      "title": "Imp4"
+          ""
+          "rove Your English Listening Skills",
+      "thumbnail": "https://img.youtube.com/vi/9bZkp7q19f0/0.jpg"
+    },
+    {
+      "id": "kJQP7kiw5Fk",
+      "title": "English Pronunciation Tips",
+      "thumbnail": "https://img.youtube.com/vi/kJQP7kiw5Fk/0.jpg"
+    },
+    {
+      "id": "OPf0YbXqDm0",
+      "title": "Common English Phrases",
+      "thumbnail": "https://img.youtube.com/vi/OPf0YbXqDm0/0.jpg"
+    },
+    {
+      "id": "CevxZvSJLk8",
+      "title": "English Conversation Practice",
+      "thumbnail": "https://img.youtube.com/vi/CevxZvSJLk8/0.jpg"
+    },
+    {
+      "id": "F2BwGZ6Z8R0",
+      "title": "English for Beginners",
+      "thumbnail": "https://img.youtube.com/vi/F2BwGZ6Z8R0/0.jpg"
+    },
+    {
+      "id": "G6r2Tk0J5Xo",
+      "title": "Advanced English Vocabulary",
+      "thumbnail": "https://img.youtube.com/vi/G6r2Tk0J5Xo/0.jpg"
+    },
+
   ];
 
   late YoutubePlayerController _controller;
@@ -114,13 +160,23 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
                     Positioned(
                       bottom: 16,
                       left: 16,
-                      child: Text(
-                        video["title"]!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          backgroundColor: Colors.black54,
+                      right: 16, // Constrain the title to the width of the card
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          video["title"]!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          maxLines: 2, // Allow up to 2 lines
+                          overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
                         ),
                       ),
                     ),
