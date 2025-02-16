@@ -85,19 +85,7 @@ class SignUpScreen extends StatelessWidget {
                 // Logo
                 Column(
                   children: [
-                    // Image.asset(
-                    //   'assets/image.png',
-                    //   height: 60, // Increased height for better visibility
-                    // ),
-                    // SizedBox(height: 20),
-                    // Text(
-                    //   'Lexfy',
-                    //   style: TextStyle(
-                    //     fontSize: 32,
-                    //     fontWeight: FontWeight.bold,
-                    //     color: Color(0xFF636AE8),
-                    //   ),
-                    // ),
+
                     Image.asset(
                       'assets/images/logos/Logo-Purple-S.png',
                       height: 60,

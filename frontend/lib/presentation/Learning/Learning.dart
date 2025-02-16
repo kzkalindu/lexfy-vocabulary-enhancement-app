@@ -32,7 +32,6 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
       "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg"
     },
     {
-
       "id": "3JZ_D3ELwOQ",
       "title": "Top 10 Commonly Mispronounced Words",
       "thumbnail": "https://img.youtube.com/vi/3JZ_D3ELwOQ/0.jpg"

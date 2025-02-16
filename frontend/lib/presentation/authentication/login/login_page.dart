@@ -106,14 +106,7 @@ class _LoginScreenState extends State<LoginScreen>
                       'assets/images/logos/Logo-Purple-S.png',
                       height: 60,
                     ),
-                    // Text(
-                    //   'Lexfy',
-                    //   style: TextStyle(
-                    //     color: Color(0xFF636AE8),
-                    //     fontWeight: FontWeight.bold,
-                    //     fontSize: 30,
-                    //   ),
-                    // ),
+
                   ],
                 ),
               ),
@@ -223,61 +216,6 @@ class _LoginScreenState extends State<LoginScreen>
                 ],
               ),
               SizedBox(height: 16),
-              // Social Login Buttons
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //   children: [
-              //     // Google Login
-              //     SizedBox(
-              //       width: MediaQuery.of(context).size.width * 0.4,
-              //       child: ElevatedButton.icon(
-              //         onPressed: () {
-              //           // Handle Google Login
-              //         },
-              //         style: ElevatedButton.styleFrom(
-              //           backgroundColor: Colors.white,
-              //           foregroundColor: Colors.black,
-              //           side: BorderSide(color: Colors.grey.shade300),
-              //           shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(7),
-              //           ),
-              //         ),
-              //         icon: Image.asset(
-              //           'assets/icons/auth/Google.png',
-              //           width: 20,
-              //           height: 20,
-              //         ),
-              //         label: Text('Continue with Google'),
-              //       ),
-              //     ),
-              //     // Facebook Login
-              //     SizedBox(
-              //       width: MediaQuery.of(context).size.width * 0.4,
-              //       child: ElevatedButton.icon(
-              //         onPressed: () {
-              //           // Handle Facebook Login
-              //         },
-              //         style: ElevatedButton.styleFrom(
-              //           backgroundColor: Colors.white,
-              //           foregroundColor: Colors.black,
-              //           side: BorderSide(color: Colors.grey.shade300),
-              //           shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(7),
-              //           ),
-              //         ),
-              //         icon: Image.asset(
-              //           'assets/icons/auth/Facebook.png',
-              //           width: 20,
-              //           height: 20,
-              //         ),
-              //         label: SizedBox(
-              //           width: MediaQuery.of(context).size.width * 0.4,
-              //           child: const Text('Continue with Facebook'),
-              //         ),
-              //       ),
-              //     ),
-              //   ],
-              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
