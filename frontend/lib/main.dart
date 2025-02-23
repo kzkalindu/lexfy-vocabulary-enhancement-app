@@ -1,16 +1,19 @@
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 // import '/presentation/Others/splash_page.dart';
 // import '/presentation/authentication/login/login_page.dart';
 // import '/presentation/authentication/signup/signup_page.dart';
-// //import 'screens/get_started_screen.dart';
 // import '/presentation/home/home_page.dart';
-// //import 'screens/ai_coach_screen.dart';
-// //import 'screens/daily_challenge_screen.dart';
-// //import 'screens/quizzes_screen.dart';
-// //import 'screens/profile_screen.dart';
+// import '/presentation/profile/profile_page.dart';
+// import '/presentation/learning/learning_page.dart';
+// import '/presentation/profile/leaderboard_page.dart';
 //
-// void main() {
-//  runApp(const LexfyApp());
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//   runApp(const LexfyApp());
 // }
 //
 // class LexfyApp extends StatelessWidget {
@@ -30,18 +33,115 @@
 //         '/': (context) => SplashScreen(),
 //         '/login': (context) => LoginScreen(),
 //         '/signup': (context) => SignUpScreen(),
-//         //'/get-started': (context) => GetStartedScreen(),
-//         '/home': (context) => const LexfyHomePage(),
-//         //'/ai-coach': (context) => const AICoachScreen(),
-//         //'/daily-challenge': (context) => const DailyChallengeScreen(),
-//         //'/quizzes': (context) => const QuizzesScreen(),
-//         //'/profile': (context) => const ProfileScreen(),
+//         '/home': (context) => const HomeScreen(),
+//         '/learning': (context) => YouTubeVideoScreen(),
+//         '/profile': (context) => ProfileScreen(
+//           writingXP: 0,
+//           listeningXP: 0,
+//           speakingXP: 0,
+//         ),
+//         '/leaderboard': (context) => LeaderboardScreen(),
 //       },
 //     );
 //   }
 // }
 //
-// // Main Navigation
+// class SplashScreen extends StatefulWidget {
+//   @override
+//   _SplashScreenState createState() => _SplashScreenState();
+// }
+//
+// class _SplashScreenState extends State<SplashScreen> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     Future.delayed(Duration(seconds: 3), checkUserStatus);
+//   }
+//
+//   void checkUserStatus() {
+//     User? user = FirebaseAuth.instance.currentUser;
+//     if (user != null) {
+//       Navigator.pushReplacementNamed(context, '/home');
+//     } else {
+//       Navigator.pushReplacementNamed(context, '/login');
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: SafeArea(
+//         child: Container(
+//           width: double.infinity,
+//           height: double.infinity,
+//           color: Color(0xFF636AE8),
+//           child: Center(
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Image.asset(
+//                   'assets/images/logos/Logo-White.png',
+//                   width: 220,
+//                   height: 220,
+//                 ),
+//                 const SizedBox(height: 20),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+// import '/presentation/Others/splash_page.dart';
+// import '/presentation/authentication/login/login_page.dart';
+// import '/presentation/authentication/signup/signup_page.dart';
+// import '/presentation/home/home_page.dart';
+// import '/presentation/profile/profile_page.dart';
+// import '/presentation/learning/learning_page.dart';
+// import '/presentation/profile/leaderboard_page.dart';
+//
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//   runApp(const LexfyApp());
+// }
+//
+// class LexfyApp extends StatelessWidget {
+//   const LexfyApp({Key? key}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         primaryColor: const Color(0xFF636AE8),
+//         fontFamily: 'Poppins',
+//         scaffoldBackgroundColor: Colors.white,
+//       ),
+//       initialRoute: '/',
+//       routes: {
+//         '/': (context) => SplashScreen(),
+//         '/login': (context) => LoginScreen(),
+//         '/signup': (context) => SignUpScreen(),
+//         '/home': (context) => const LexfyHomePage(),
+//         '/learning': (context) => YouTubeVideoScreen(),
+//         '/profile': (context) => ProfileScreen(
+//           writingXP: 0,
+//           listeningXP: 0,
+//           speakingXP: 0,
+//         ),
+//         '/leaderboard': (context) => LeaderboardScreen(),
+//       },
+//     );
+//   }
+// }
+//
 // class LexfyHomePage extends StatefulWidget {
 //   const LexfyHomePage({Key? key}) : super(key: key);
 //
@@ -51,27 +151,16 @@
 //
 // class _LexfyHomePageState extends State<LexfyHomePage> {
 //   int _selectedIndex = 0;
-//   final ScrollController _scrollController = ScrollController();
-//
-//   void _onItemTapped(int index) {
-//     setState(() {
-//       _selectedIndex = index;
-//     });
-//     if (_scrollController.hasClients) {
-//       _scrollController.animateTo(
-//         0,
-//         duration: const Duration(milliseconds: 300),
-//         curve: Curves.easeOut,
-//       );
-//     }
-//   }
 //
 //   final List<Widget> _screens = [
 //     const HomeScreen(),
-//     //const AICoachScreen(),
-//    // const DailyChallengeScreen(),
-//    // const QuizzesScreen(),
-//    // const ProfileScreen(),
+//     YouTubeVideoScreen(),
+//     ProfileScreen(
+//       writingXP: 0,
+//       listeningXP: 0,
+//       speakingXP: 0,
+//     ),
+//     LeaderboardScreen(),
 //   ];
 //
 //   @override
@@ -83,16 +172,8 @@
 //         title: Row(
 //           children: [
 //             Image.asset(
-//               'assets/image.png',
-//               height: 40, // Increased height for better visibility
-//             ),
-//             const Text(
-//               'Lexfy',
-//               style: TextStyle(
-//                 color: Color(0xFF636AE8),
-//                 fontWeight: FontWeight.bold,
-//                 fontSize: 30, // Adjusted font size for better balance
-//               ),
+//               'assets/images/logos/Logo-Purple-S.png',
+//               height: 40,
 //             ),
 //           ],
 //         ),
@@ -107,52 +188,135 @@
 //           ),
 //         ],
 //       ),
-//       body: Padding(
-//         padding: const EdgeInsets.symmetric(
-//             horizontal: 16.0,
-//             vertical: 8.0), // Adjusted padding for better layout
-//         child: SingleChildScrollView(
-//           controller: _scrollController,
-//           child: _screens[_selectedIndex],
-//         ),
+//       body: SingleChildScrollView(
+//         child: _screens[_selectedIndex],
 //       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         type: BottomNavigationBarType.fixed,
-//         selectedItemColor: const Color(0xFF636AE8),
-//         unselectedItemColor: Colors.grey,
-//         currentIndex: _selectedIndex,
-//         onTap: _onItemTapped,
-//         items: const [
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.home),
-//             label: "Home",
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.chat_bubble_outline),
-//             label: "AI Coach",
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.flag_outlined),
-//             label: "Daily Challenge",
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.quiz),
-//             label: "Quiz",
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.person_outline),
-//             label: "Profile",
-//           ),
-//         ],
+//       bottomNavigationBar: BottomNavBar(
+//         selectedIndex: _selectedIndex,
+//         onItemTapped: (index) {
+//           setState(() {
+//             _selectedIndex = index;
+//           });
+//         },
 //       ),
 //     );
 //   }
 // }
 //
+// class BottomNavBar extends StatelessWidget {
+//   final int selectedIndex;
+//   final ValueChanged<int> onItemTapped;
+//
+//   const BottomNavBar({
+//     Key? key,
+//     required this.selectedIndex,
+//     required this.onItemTapped,
+//   }) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       margin: const EdgeInsets.all(4),
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(50),
+//         border: Border.all(color: Colors.deepPurple, width: 1),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.1),
+//             blurRadius: 10,
+//             offset: const Offset(0, 1),
+//           ),
+//         ],
+//       ),
+//       child: ClipRRect(
+//         borderRadius: BorderRadius.circular(50),
+//         child: BottomNavigationBar(
+//           elevation: 0,
+//           backgroundColor: Colors.transparent,
+//           type: BottomNavigationBarType.fixed,
+//           items: const <BottomNavigationBarItem>[
+//             BottomNavigationBarItem(
+//               icon: Icon(Icons.home, size: 20),
+//               label: 'Home',
+//             ),
+//             BottomNavigationBarItem(
+//               icon: Icon(Icons.book, size: 20),
+//               label: 'Learning',
+//             ),
+//             BottomNavigationBarItem(
+//               icon: Icon(Icons.person_outline, size: 20),
+//               label: 'Profile',
+//             ),
+//             BottomNavigationBarItem(
+//               icon: Icon(Icons.leaderboard, size: 20),
+//               label: 'Leaderboard',
+//             ),
+//           ],
+//           currentIndex: selectedIndex,
+//           selectedItemColor: Colors.deepPurple,
+//           unselectedItemColor: Colors.grey,
+//           onTap: onItemTapped,
+//         ),
+//       ),
+//     );
+//   }
+// }
+//
+// class SplashScreen extends StatefulWidget {
+//   @override
+//   _SplashScreenState createState() => _SplashScreenState();
+// }
+//
+// class _SplashScreenState extends State<SplashScreen> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     Future.delayed(Duration(seconds: 3), checkUserStatus);
+//   }
+//
+//   void checkUserStatus() {
+//     User? user = FirebaseAuth.instance.currentUser;
+//     if (user != null) {
+//       Navigator.pushReplacementNamed(context, '/home');
+//     } else {
+//       Navigator.pushReplacementNamed(context, '/login');
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: SafeArea(
+//         child: Container(
+//           width: double.infinity,
+//           height: double.infinity,
+//           color: Color(0xFF636AE8),
+//           child: Center(
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Image.asset(
+//                   'assets/images/logos/Logo-White.png',
+//                   width: 220,
+//                   height: 220,
+//                 ),
+//                 const SizedBox(height: 20),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/presentation/ai_coach/ai_coach_page.dart';
+import 'package:frontend/presentation/quizzes/all_quizzes/quiz_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '/presentation/Others/splash_page.dart';
 import '/presentation/authentication/login/login_page.dart';
@@ -161,6 +325,8 @@ import '/presentation/home/home_page.dart';
 import '/presentation/profile/profile_page.dart';
 import '/presentation/learning/learning_page.dart';
 import '/presentation/profile/leaderboard_page.dart';
+import '/presentation/quizzes/all_quizzes/quiz_page.dart';
+import '/presentation/ai_coach/ai_coach_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -185,7 +351,7 @@ class LexfyApp extends StatelessWidget {
         '/': (context) => SplashScreen(),
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const LexfyHomePage(),
         '/learning': (context) => YouTubeVideoScreen(),
         '/profile': (context) => ProfileScreen(
           writingXP: 0,
@@ -195,6 +361,148 @@ class LexfyApp extends StatelessWidget {
         '/leaderboard': (context) => LeaderboardScreen(),
       },
     );
+  }
+}
+
+class LexfyHomePage extends StatefulWidget {
+  const LexfyHomePage({Key? key}) : super(key: key);
+
+  @override
+  _LexfyHomePageState createState() => _LexfyHomePageState();
+}
+
+class _LexfyHomePageState extends State<LexfyHomePage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const ChatScreen(),
+    YouTubeVideoScreen(),
+    const QuizScreen(),
+    ProfileScreen(
+      writingXP: 0,
+      listeningXP: 0,
+      speakingXP: 0,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logos/Logo-Purple-S.png',
+              height: 40,
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none, color: Colors.black),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.settings, color: Colors.black),
+          ),
+        ],
+      ),
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onIndexChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      ),
+    );
+  }
+}
+
+class BottomNavBar extends StatefulWidget {
+  final int currentIndex;
+  final ValueChanged<int> onIndexChanged;
+
+  const BottomNavBar({
+    Key? key,
+    required this.currentIndex,
+    required this.onIndexChanged,
+  }) : super(key: key);
+
+  @override
+  _BottomNavBarState createState() => _BottomNavBarState();
+}
+
+class _BottomNavBarState extends State<BottomNavBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: _buildBoxDecoration(),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: _buildBottomNavigationBar(),
+      ),
+    );
+  }
+
+  BoxDecoration _buildBoxDecoration() {
+    return BoxDecoration(
+      color: const Color.fromARGB(255, 255, 255, 255),
+      borderRadius: BorderRadius.circular(50),
+      border: Border.all(color: Colors.deepPurple, width: 2),
+      boxShadow: [
+        BoxShadow(
+          color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.3),
+          blurRadius: 5,
+          offset: const Offset(0, -4),
+        ),
+      ],
+    );
+  }
+
+  BottomNavigationBar _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      elevation: 0,
+      backgroundColor: const Color.fromARGB(0, 43, 43, 43),
+      type: BottomNavigationBarType.fixed,
+      items: _buildBottomNavigationBarItems(),
+      currentIndex: widget.currentIndex,
+      selectedItemColor: Colors.deepPurple,
+      unselectedItemColor: Colors.grey,
+      onTap: widget.onIndexChanged,
+    );
+  }
+
+  List<BottomNavigationBarItem> _buildBottomNavigationBarItems() {
+    return const <BottomNavigationBarItem>[
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home, size: 20),
+        label: 'Home',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.chat_bubble_outline, size: 20),
+        label: 'Talk with Lexfy',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.book, size: 20),
+        label: 'Learnings',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.quiz, size: 20),
+        label: 'Quizzes',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person_outline, size: 20),
+        label: 'Profile',
+      ),
+    ];
   }
 }
 
