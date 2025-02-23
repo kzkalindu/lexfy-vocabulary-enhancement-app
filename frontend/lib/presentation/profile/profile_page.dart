@@ -271,8 +271,8 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 40),
-              _buildHeader(),
+              // SizedBox(height: 40),
+              // _buildHeader(),
               SizedBox(height: 30),
               _buildProfileSection(),
               SizedBox(height: 30),
@@ -285,38 +285,38 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavBar(),
+      // bottomNavigationBar: BottomNavBar(),
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.lightbulb, color: Color(0xFF636AE8)),
-            SizedBox(width: 5),
-            Text(
-              'Lexfy',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF636AE8),
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Icon(Icons.notifications_none, size: 28),
-            SizedBox(width: 10),
-            Icon(Icons.settings, size: 28),
-          ],
-        ),
-      ],
-    );
-  }
+  // Widget _buildHeader() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Row(
+  //         children: [
+  //           Icon(Icons.lightbulb, color: Color(0xFF636AE8)),
+  //           SizedBox(width: 5),
+  //           Text(
+  //             'Lexfy',
+  //             style: TextStyle(
+  //               fontSize: 28,
+  //               fontWeight: FontWeight.bold,
+  //               color: Color(0xFF636AE8),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       Row(
+  //         children: [
+  //           Icon(Icons.notifications_none, size: 28),
+  //           SizedBox(width: 10),
+  //           Icon(Icons.settings, size: 28),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildProfileSection() {
     int totalXP = writingXP + listeningXP + speakingXP;
@@ -468,35 +468,35 @@ class ProfileScreen extends StatelessWidget {
 }
 
 // Bottom navigation bar widget
-class BottomNavBar extends StatefulWidget {
-  @override
-  _BottomNavBarState createState() => _BottomNavBarState();
-}
+// class BottomNavBar extends StatefulWidget {
+//   @override
+//   _BottomNavBarState createState() => _BottomNavBarState();
+// }
 
-// State class for BottomNavBar
-class _BottomNavBarState extends State<BottomNavBar> {
-  int _selectedIndex = 0;
+// // State class for BottomNavBar
+// class _BottomNavBarState extends State<BottomNavBar> {
+//   int _selectedIndex = 0;
+//
+//   void _onItemTapped(int index) {
+//     setState(() {
+//       _selectedIndex = index;
+//     });
+//   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      selectedItemColor: Colors.deepPurple,
-      unselectedItemColor: Colors.grey,
-      onTap: _onItemTapped,
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Talk with Lexfy'),
-        BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Learnings'),
-        BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quizzes'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-      ],
-    );
-  }
-}
+  // @override
+  // Widget build(BuildContext context) {
+  //   return BottomNavigationBar(
+  //     currentIndex: _selectedIndex,
+  //     selectedItemColor: Colors.deepPurple,
+  //     unselectedItemColor: Colors.grey,
+  //     onTap: _onItemTapped,
+  //     items: const <BottomNavigationBarItem>[
+  //       BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+  //       BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Talk with Lexfy'),
+  //       BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Learnings'),
+  //       BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quizzes'),
+  //       BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+  //     ],
+  //   );
+  // }
+// }
