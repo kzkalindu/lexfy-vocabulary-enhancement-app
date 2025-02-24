@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317425904336",
+    "project_id": "lexfy-app-ae809",
+    "storage_bucket": "lexfy-app-ae809.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317425904336:android:0a70d2e01563a16a23ccd5",
+        "android_client_info": {
+          "package_name": "com.lexfy.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs66bUN-01le9qVOLCDJHcQwDQ6uhus1A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
