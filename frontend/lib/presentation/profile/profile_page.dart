@@ -3,8 +3,8 @@ import 'Leaderboard_page.dart'; // Importing LeaderboardScreen
 import 'package:fl_chart/fl_chart.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final int selectedIndex;
-  final Function(int) onItemTapped;
+  // final int selectedIndex;
+  // final Function(int) onItemTapped;
 
   // Adding user XP data
   int writingXP;
@@ -12,8 +12,8 @@ class ProfileScreen extends StatefulWidget {
   int speakingXP;
 
   ProfileScreen({
-    required this.selectedIndex,
-    required this.onItemTapped,
+    // required this.selectedIndex,
+    // required this.onItemTapped,
     required this.writingXP,
     required this.listeningXP,
     required this.speakingXP,
