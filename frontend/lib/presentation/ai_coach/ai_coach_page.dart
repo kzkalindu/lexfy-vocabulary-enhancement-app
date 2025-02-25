@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chat_screen.dart.dart';
+import 'chat_screen.dart';
 
 class AiCoachScreenChooseTopic extends StatefulWidget {
   const AiCoachScreenChooseTopic({super.key});
