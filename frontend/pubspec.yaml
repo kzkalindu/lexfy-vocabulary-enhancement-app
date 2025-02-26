@@ -80,6 +80,8 @@ flutter:
     - assets/images/logos/Logo-Purple-S.png
     - assets/images/logos/Logo-White.png
     - assets/icons/ai/ai_icon.png
+    - assets/images/profiles/female.jpg
+    - assets/images/profiles/male.jpg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
