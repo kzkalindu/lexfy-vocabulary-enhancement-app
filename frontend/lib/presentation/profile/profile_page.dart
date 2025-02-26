@@ -4,17 +4,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatefulWidget {
-  // final int selectedIndex;
-  // final Function(int) onItemTapped;
-
-  // Adding user XP data
   int writingXP;
   int listeningXP;
   int speakingXP;
 
   ProfileScreen({
-    // required this.selectedIndex,
-    // required this.onItemTapped,
     required this.writingXP,
     required this.listeningXP,
     required this.speakingXP,
@@ -26,25 +20,61 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String userName = "User"; // Default name
-  // Method to update XP values
-  void updateXP(int writing, int listening, int speaking) {
-    setState(() {
-      widget.writingXP += writing;
-      widget.listeningXP += listening;
-      widget.speakingXP += speaking;
-    });
-  }
+  String selectedAvatar = "assets/images/avatars/avatar1.png"; // Default avatar
+
   @override
   void initState() {
     super.initState();
     _fetchUserName();
   }
+
   // Fetch user display name from Firebase Authentication
   void _fetchUserName() {
     User? user = FirebaseAuth.instance.currentUser;
     setState(() {
       userName = user?.displayName ?? "User"; // Default to "User" if null
     });
+  }
+
+  // Show Avatar Selection Dialog
+  void _showAvatarSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Choose Your Avatar"),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedAvatar = "assets/images/profiles/male.jpg";
+                  });
+                  Navigator.pop(context);
+                },
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage("assets/images/profiles/male.jpg"),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedAvatar = "assets/images/profiles/female.jpg";
+                  });
+                  Navigator.pop(context);
+                },
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage("assets/images/profiles/female.jpg"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -87,10 +117,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.grey[200],
-            child: Icon(Icons.person, size: 40, color: Colors.grey[400]),
+          GestureDetector(
+            onTap: _showAvatarSelectionDialog,
+            child: CircleAvatar(
+              radius: 40,
+              backgroundImage: AssetImage(selectedAvatar),
+            ),
           ),
           SizedBox(width: 16),
           Column(
@@ -116,7 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
 
   Widget _buildUserStatistics() {
     return Container(
