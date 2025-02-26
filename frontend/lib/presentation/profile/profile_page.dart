@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'Leaderboard_page.dart'; // Importing LeaderboardScreen
 import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -216,8 +217,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.red,
         padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
       ),
-      onPressed: () {
-        // Handle logout action
+      onPressed: () async {
+        try {
+          // Sign out from Firebase Auth
+          await FirebaseAuth.instance.signOut();
+
+          // Navigate to login page and remove all previous routes
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/login', // Replace with your login route name
+                (Route<dynamic> route) => false,
+          );
+        } catch (e) {
+          // Show error message if logout fails
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Logout failed: ${e.toString()}')),
+          );
+        }
       },
       child: Text('Logout', style: TextStyle(color: Colors.white)),
     );
