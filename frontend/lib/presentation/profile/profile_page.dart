@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'Leaderboard_page.dart'; // Importing LeaderboardScreen
 import 'package:fl_chart/fl_chart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatefulWidget {
   // final int selectedIndex;
@@ -24,12 +25,25 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String userName = "User"; // Default name
   // Method to update XP values
   void updateXP(int writing, int listening, int speaking) {
     setState(() {
       widget.writingXP += writing;
       widget.listeningXP += listening;
       widget.speakingXP += speaking;
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+  // Fetch user display name from Firebase Authentication
+  void _fetchUserName() {
+    User? user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      userName = user?.displayName ?? "User"; // Default to "User" if null
     });
   }
 
@@ -79,17 +93,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Icon(Icons.person, size: 40, color: Colors.grey[400]),
           ),
           SizedBox(width: 16),
-          Text(
-            'Hello! User',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hello,',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                userName,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildUserStatistics() {
     return Container(
