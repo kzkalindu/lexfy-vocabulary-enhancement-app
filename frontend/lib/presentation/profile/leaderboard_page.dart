@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,11 +19,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   Future<void> fetchLeaderboard() async {
-    final url = Uri.parse('https://example.com/api/leaderboard');
+    final url = Uri.parse('https://example.com/api/leaderboard'); // Replace with actual API URL
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        
+        // Sort leaderboard in descending order of XP points
+        data.sort((a, b) => b['xp'].compareTo(a['xp']));
+
         setState(() {
           leaderboard = data;
           isLoading = false;
@@ -86,6 +89,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
+                onChanged: (value) {
+                  setState(() {}); // Refresh UI when searching
+                },
               ),
             ),
           ),
@@ -115,61 +121,77 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
-              itemCount: leaderboard.length,
-              itemBuilder: (context, index) {
-                final user = leaderboard[index];
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 24,
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: index < 3 ? Colors.blue : Colors.grey[600],
-                          ),
+                    itemCount: leaderboard.length,
+                    itemBuilder: (context, index) {
+                      final user = leaderboard[index];
+
+                      // Apply search filtering
+                      if (searchController.text.isNotEmpty &&
+                          !user['username']
+                              .toLowerCase()
+                              .contains(searchController.text.toLowerCase())) {
+                        return SizedBox();
+                      }
+
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              child: Text(
+                                '${index + 1}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: index < 3 ? Colors.blue : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey[200],
+                              backgroundImage: user['avatar'] != null
+                                  ? NetworkImage(user['avatar'])
+                                  : null,
+                              child: user['avatar'] == null
+                                  ? Text(
+                                      user['username'][0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    user['username'],
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${user['xp']} XP',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      SizedBox(width: 12),
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: NetworkImage(user['avatar'] ?? ''),
-                        child: user['avatar'] == null
-                            ? Text(
-                          user['username'][0].toUpperCase(),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                            : null,
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        user['username'],
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        '${user['xp']} XP',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
@@ -186,18 +208,29 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 // Mock data for testing
 final mockLeaderboard = [
   {
-    'username': 'Username1',
+    'username': 'JohnDoe',
     'xp': 5000,
-    'avatar': null,
+    'avatar': 'https://example.com/avatar1.jpg',
   },
   {
-    'username': 'Username2',
+    'username': 'JaneSmith',
     'xp': 4800,
-    'avatar': null,
+    'avatar': 'https://example.com/avatar2.jpg',
   },
   {
-    'username': 'Username3',
+    'username': 'AlexBrown',
     'xp': 4700,
     'avatar': null,
   },
+  {
+    'username': 'ChrisGreen',
+    'xp': 4500,
+    'avatar': 'https://example.com/avatar3.jpg',
+  },
+  {
+    'username': 'SamWhite',
+    'xp': 4200,
+    'avatar': null,
+  },
 ];
+
