@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Leaderboard_page.dart'; // Importing LeaderboardScreen
-import 'package:fl_chart/fl_chart.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 class ProfileScreen extends StatefulWidget {
-  int writingXP;
-  int listeningXP;
-  int speakingXP;
-
-  ProfileScreen({
-    required this.writingXP,
-    required this.listeningXP,
-    required this.speakingXP,
-  });
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
