@@ -39,7 +39,7 @@ class LexfyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
         '/home': (context) => const LexfyHomePage(),
-        '/learning': (context) => YouTubeVideoScreen(),
+        '/learning': (context) => LearningPage(),
         '/profile': (context) => ProfileScreen(),
         '/leaderboard': (context) => LeaderboardScreen(),
       },
@@ -60,7 +60,7 @@ class _LexfyHomePageState extends State<LexfyHomePage> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const AiCoachScreenChooseTopic(),
-    YouTubeVideoScreen(),
+    LearningPage(),
     const QuizScreen(),
     ProfileScreen(),
   ];
