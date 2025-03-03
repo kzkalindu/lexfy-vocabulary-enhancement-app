@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Leaderboard_page.dart'; // Importing LeaderboardScreen
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _fetchUserName();
+    _loadSelectedAvatar();
   }
 
   // Fetch user display name from Firebase Authentication
@@ -25,6 +27,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       userName = user?.displayName ?? "User"; // Default to "User" if null
     });
+  }
+
+  // Load selected avatar from SharedPreferences
+  void _loadSelectedAvatar() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectedAvatar = prefs.getString('selectedAvatar') ?? "assets/images/avatars/avatar1.png";
+    });
+  }
+
+  // Save selected avatar to SharedPreferences
+  void _saveSelectedAvatar(String avatarPath) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedAvatar', avatarPath);
   }
 
   // Show Avatar Selection Dialog
@@ -42,6 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   setState(() {
                     selectedAvatar = "assets/images/profiles/male.jpg";
                   });
+                  _saveSelectedAvatar(selectedAvatar);  // Save the selected avatar
                   Navigator.pop(context);
                 },
                 child: CircleAvatar(
@@ -54,6 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   setState(() {
                     selectedAvatar = "assets/images/profiles/female.jpg";
                   });
+                  _saveSelectedAvatar(selectedAvatar);  // Save the selected avatar
                   Navigator.pop(context);
                 },
                 child: CircleAvatar(
