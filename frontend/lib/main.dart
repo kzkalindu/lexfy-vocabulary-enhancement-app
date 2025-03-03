@@ -11,9 +11,10 @@ import '/presentation/home/home_page.dart';
 import '/presentation/profile/profile_page.dart';
 import '/presentation/learning/learning_page.dart';
 import '/presentation/profile/leaderboard_page.dart';
-import '/presentation/quizzes/all_quizzes/quiz_page.dart';
+import 'presentation/quizzes/all_quizzes_page.dart';
 import '/presentation/ai_coach/ai_coach_page.dart';
 import '/presentation/ai_coach/chat_screen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +62,7 @@ class _LexfyHomePageState extends State<LexfyHomePage> {
     const HomeScreen(),
     const AiCoachScreenChooseTopic(),
     YouTubeVideoScreen(),
-    const QuizScreen(),
+    const SelectTaskPage(),
     ProfileScreen(),
   ];
 

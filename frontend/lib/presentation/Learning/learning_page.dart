@@ -30,7 +30,7 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
   late YoutubePlayerController _controller;
 
   // Backend URL (Change if needed)
-  final String backendUrl = 'http:// 192.168.45.252:3000/api/videos';
+  final String backendUrl = 'https://lexfy-vocabulary-enhancement-app.vercel.app/api/videos';
 
   // Fetch videos from the backend
   Future<void> fetchVideos() async {
