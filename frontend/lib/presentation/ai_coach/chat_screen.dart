@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'dart:typed_data';
 import 'dart:convert';
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:record/record.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:http_parser/http_parser.dart';
-
+import 'package:web_socket_channel/io.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ChatScreen extends StatefulWidget {
   final String topic;
@@ -20,188 +19,156 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<Map<String, String>> messages = [];
   final ScrollController _scrollController = ScrollController();
   late final AudioRecorder _audioRecorder;
-
-  // Replace with your computer's IP address
-  final String baseUrl = 'http://10.0.2.2:5001';
-  final String baseUrlPhone = 'http://172.20.10.11:5001';// Update this!
-
-  bool isLoading = false;
+  late IOWebSocketChannel _channel;
+  final FlutterTts _flutterTts = FlutterTts();
   bool isRecording = false;
+  bool conversationStarted = false;
 
   @override
   void initState() {
     super.initState();
     _audioRecorder = AudioRecorder();
     _requestPermissions();
-    _fetchInitialAIResponse();
+    _connectWebSocket();
+    _configureTextToSpeech();
   }
 
   @override
   void dispose() {
     _audioRecorder.dispose();
     _scrollController.dispose();
+    _channel.sink.close();
     super.dispose();
   }
 
   Future<void> _requestPermissions() async {
-    try {
-      if (!await _audioRecorder.hasPermission()) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Microphone permission is required")),
-          );
-        }
-      }
-    } catch (e) {
-      print("Error checking permissions: $e");
+    if (!await _audioRecorder.hasPermission()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Microphone permission is required")),
+      );
     }
   }
 
-  Future<void> _fetchInitialAIResponse() async {
-    await getAIResponse("Hi!");
+  void _configureTextToSpeech() {
+    _flutterTts.setLanguage("en-US");
+    _flutterTts.setSpeechRate(0.5);
+    _flutterTts.setVolume(1.0);
+    _flutterTts.setPitch(1.0);
+  }
+
+  void _connectWebSocket() {
+    String serverIp = "192.168.68.100"; // Replace with your server IP
+    String wsUrl = "ws://$serverIp:3000";
+    print("Connecting to WebSocket: $wsUrl");
+
+    _channel = IOWebSocketChannel.connect(wsUrl);
+
+    _channel.stream.listen((message) {
+      final decodedMessage = jsonDecode(message);
+      final transcript = decodedMessage["text"];
+      final role = decodedMessage["role"];
+
+      setState(() {
+        if (role == "user") {
+          // Add new user message
+          messages.add({"role": "user", "text": transcript});
+
+          // Check if this is the "hi" message to start conversation
+          if (transcript.trim().toLowerCase() == "hi" && !conversationStarted) {
+            conversationStarted = true;
+          }
+        } else if (role == "ai") {
+          if (messages.isNotEmpty && messages.last["role"] == "ai") {
+            // Update existing AI message
+            messages.last["text"] = "${messages.last["text"]}$transcript";
+          } else {
+            // Add new AI message
+            messages.add({"role": "ai", "text": transcript});
+          }
+
+          // Speak the AI response
+          _speakText(transcript);
+        }
+      });
+
+      // Auto-scroll to bottom
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }, onError: (error) {
+      print("WebSocket Error: $error");
+      Future.delayed(const Duration(seconds: 3), _connectWebSocket);
+    }, onDone: () {
+      print("WebSocket closed, reconnecting...");
+      Future.delayed(const Duration(seconds: 3), _connectWebSocket);
+    });
+  }
+
+  Future<void> _speakText(String text) async {
+    await _flutterTts.speak(text);
   }
 
   Future<void> startRecording() async {
     try {
       if (await _audioRecorder.hasPermission()) {
-        final directory = await getTemporaryDirectory();
-        final filePath = '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.wav'; // Changed to .wav
+        if (isRecording) {
+          await stopRecording();
+        }
 
-        final config = RecordConfig(
-          encoder: AudioEncoder.wav,
-          bitRate: 128000,// Changed to WAV format
-          sampleRate: 44100, // Recommended for speech recognition
-          numChannels: 1,
-          // Mono audio
+        _channel.sink.add(jsonEncode({"event": "start"}));
+
+        Stream<Uint8List> stream = await _audioRecorder.startStream(
+          RecordConfig(encoder: AudioEncoder.pcm16bits, sampleRate: 16000, numChannels: 1),
         );
 
-        await _audioRecorder.start(config, path: filePath);
+        print("🎤 Recording started. Streaming to backend...");
+
+        stream.listen(
+              (Uint8List audioData) {
+            if (audioData.isNotEmpty) {
+              _channel.sink.add(jsonEncode({
+                "event": "audio",
+                "audio": base64Encode(audioData)
+              }));
+            }
+          },
+          onError: (error) {
+            print("❌ Error streaming audio: $error");
+            stopRecording();
+          },
+          onDone: () {
+            print("🎤 Audio stream finished.");
+          },
+        );
+
         setState(() => isRecording = true);
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Microphone permission is required")),
-          );
-        }
-      }
-    } catch (e) {
-      print("Error starting recording: $e");
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to start recording: $e")),
+          const SnackBar(content: Text("Microphone permission is required")),
         );
       }
+    } catch (e) {
+      print("❌ Error starting recording: $e");
     }
   }
 
   Future<void> stopRecording() async {
     try {
-      final path = await _audioRecorder.stop();
+      if (!isRecording) return;
+
       setState(() => isRecording = false);
+      await _audioRecorder.stop();
+      _channel.sink.add(jsonEncode({"event": "stop"}));
 
-      if (path != null) {
-        setState(() => isLoading = true);
-        String transcribedText = await sendAudioToBackend(path);
-        if (transcribedText.isNotEmpty) {
-          print("✅ Sending to AI: $transcribedText");
-          await getAIResponse(transcribedText);
-        }
-        setState(() => isLoading = false);
-      }
+      print("✅ Recording stopped.");
     } catch (e) {
-      print("Error stopping recording: $e");
-      setState(() => isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to stop recording: $e")),
-        );
-      }
-    }
-  }
-
-  Future<String> sendAudioToBackend(String filePath) async {
-    try {
-      final file = File(filePath);
-      if (!await file.exists()) {
-        print("Audio file not found: $filePath");
-        return "";
-      }
-
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/speech-to-text'),
-      );
-
-      // Set the content type explicitly to audio/wav
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'audio',
-          filePath,
-          contentType: MediaType('audio', 'wav'), // Explicitly set MIME type
-        ),
-      );
-
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-      print("✅ Backend Response: ${response.body}");
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        return data["text"] ?? "";
-      } else {
-        print("Error response: ${response.body}");
-        throw Exception("Failed to transcribe audio: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error sending audio: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to process audio: $e")),
-        );
-      }
-      return "";
-    }
-  }
-
-  Future<void> getAIResponse(String userMessage) async {
-    setState(() {
-      messages.add({"role": "user", "text": userMessage});
-      isLoading = true;
-    });
-
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/chat'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"userMessage": userMessage}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String aiResponse = data["aiMessage"];
-
-        setState(() {
-          messages.add({"role": "ai", "text": aiResponse});
-          isLoading = false;
-        });
-
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-            );
-          }
-        });
-      } else {
-        throw Exception("Failed to get AI response: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error getting AI response: $e");
-      setState(() {
-        messages.add({"role": "ai", "text": "Error: Failed to get response"});
-        isLoading = false;
-      });
+      print("❌ Error stopping recording: $e");
     }
   }
 
@@ -209,113 +176,133 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.topic,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+      body: conversationStarted ? _buildChatUI() : _buildStartScreen(),
+    );
+  }
+
+  Widget _buildStartScreen() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.white.withOpacity(0.2)),
           ),
         ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                bool isUser = message["role"] == "user";
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    mainAxisAlignment:
-                    isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      if (!isUser)
-                        CircleAvatar(
-                          backgroundColor: Colors.grey[200],
-                            child: ImageIcon(AssetImage('frontend/assets/icons/ai/ai_icon.png'), color: Colors.black),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Say Hi to Start Conversation",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onLongPress: startRecording,
+                onLongPressEnd: (_) => stopRecording(),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isRecording ? Colors.red : Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 40),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChatUI() {
+    return Column(
+      children: [
+        AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(widget.topic, style: const TextStyle(color: Colors.black)),
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            itemCount: messages.length,
+            itemBuilder: (context, index) {
+              final message = messages[index];
+              bool isUser = message["role"] == "user";
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Row(
+                  mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  children: [
+                    if (!isUser) const ImageIcon(AssetImage('/Users/udula/StudioProjects/SDGP/lib/icons/ai_icon.png'), color: Colors.grey),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isUser ? Colors.purple[700] : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isUser ? Color(0xFF636AE8): Colors.grey[200],
-                            borderRadius: BorderRadius.only(
-                              topLeft: const Radius.circular(12),
-                              topRight: const Radius.circular(12),
-                              bottomLeft:
-                              isUser ? const Radius.circular(12) : Radius.zero,
-                              bottomRight:
-                              isUser ? Radius.zero : const Radius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            message["text"]!,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isUser ? Colors.white : Colors.black,
-                            ),
+                        child: Text(
+                          message["text"] ?? "",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isUser ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      if (isUser)
-                        const CircleAvatar(
-                          backgroundColor: Color(0xFF636AE8),
+                    ),
+                    if (isUser)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.purple,
                           child: Icon(Icons.person, color: Colors.white),
                         ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
-          if (isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const Text(
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const Text(
                   "Tap and Hold to Speak",
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 5),
-                GestureDetector(
-                  onLongPress: startRecording,
-                  onLongPressEnd: (_) => stopRecording(),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isRecording ? Colors.red : Color(0xFF636AE8),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.mic, color: Colors.white, size: 30),
+                  style: TextStyle(color: Colors.grey)
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onLongPress: startRecording,
+                onLongPressEnd: (_) => stopRecording(),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isRecording ? Colors.red : Colors.blue,
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 40),
                 ),
-                const SizedBox(height: 10),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
