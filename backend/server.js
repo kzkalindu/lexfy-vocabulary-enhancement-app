@@ -30,7 +30,7 @@ db.connect(err => {
     console.log('Connected to MySQL database');
 });
 
-// Add a general error handler
+// Handle database connection errors
 db.on('error', (err) => {
     console.error('Database error:', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
@@ -56,6 +56,61 @@ app.get('/api/leaderboard', (req, res) => {
         res.json(results);
     });
 });
+
+// Fetch user profile
+app.get('/api/profile/:username', (req, res) => {
+    const { username } = req.params;
+    const sql = 'SELECT username, avatar_url, total_xp FROM leaderboard WHERE username = ?';
+    
+    db.query(sql, [username], (err, result) => {
+        if (err) {
+            console.error('Error fetching user profile:', err);
+            return res.status(500).json({ error: 'Database query failed' });
+        }
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(result[0]);
+    });
+});
+
+// Update user avatar
+app.put('/api/profile/avatar', (req, res) => {
+    const { username, avatarUrl } = req.body;
+    if (!username || !avatarUrl) {
+        return res.status(400).json({ error: 'Username and avatar URL are required' });
+    }
+
+    const sql = 'UPDATE leaderboard SET avatar_url = ? WHERE username = ?';
+    db.query(sql, [avatarUrl, username], (err, result) => {
+        if (err) {
+            console.error('Error updating avatar:', err);
+            return res.status(500).json({ error: 'Database update failed' });
+        }
+        res.json({ message: 'Avatar updated successfully' });
+    });
+});
+
+app.post('/register', async (req, res) => {
+    const { username, email } = req.body;
+    
+    console.log("Received Data:", req.body);  // 👈 This will print the incoming request
+
+    if (!username || !email) {
+        return res.status(400).json({ error: "Missing username or email" });
+    }
+
+    try {
+        const query = "INSERT INTO user (username, email) VALUES (?, ?)";
+        await db.execute(query, [username, email]);
+        res.status(201).json({ message: "User registered successfully" });
+    } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).json({ error: "Database insertion failed" });
+    }
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
