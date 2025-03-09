@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/presentation/Learning/learning_page.dart';
 import 'package:frontend/presentation/ai_coach/ai_coach_page.dart';
 import 'package:frontend/presentation/quizzes/all_quizzes/quiz_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,12 +10,10 @@ import '/presentation/authentication/login/login_page.dart';
 import '/presentation/authentication/signup/signup_page.dart';
 import '/presentation/home/home_page.dart';
 import '/presentation/profile/profile_page.dart';
-import '/presentation/learning/learning_page.dart';
 import '/presentation/profile/leaderboard_page.dart';
 import 'presentation/quizzes/all_quizzes_page.dart';
 import '/presentation/ai_coach/ai_coach_page.dart';
 import '/presentation/ai_coach/chat_screen.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +39,7 @@ class LexfyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
         '/home': (context) => const LexfyHomePage(),
-        '/learning': (context) => LearningPage(),
+        '/learning': (context) => const LearningPage(),
         '/profile': (context) => ProfileScreen(),
         '/leaderboard': (context) => LeaderboardScreen(),
       },
@@ -61,7 +60,8 @@ class _LexfyHomePageState extends State<LexfyHomePage> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const AiCoachScreenChooseTopic(),
-
+    const LearningPage(),
+    const SelectTaskPage(),
     ProfileScreen(),
   ];
 
