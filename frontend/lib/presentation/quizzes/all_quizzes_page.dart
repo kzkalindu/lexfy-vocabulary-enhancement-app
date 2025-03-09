@@ -118,9 +118,7 @@ class SelectTaskPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => YouTubeVideoScreen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => LearningPage()),
                     );
                   },
                   child: const Text('Go to Learning'),
