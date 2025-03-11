@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.2
+  sdk: ">=3.6.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -41,6 +41,14 @@ dependencies:
   firebase_core: ^3.12.0
   google_sign_in: ^6.2.2
   font_awesome_flutter: ^10.8.0
+  record: ^5.2.0
+  path_provider: ^2.1.1
+  speech_to_text: ^7.0.0
+  http_parser: ^4.0.2
+  shared_preferences: ^2.5.2
+
+
+
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +80,9 @@ flutter:
     - assets/images/logos/Logo-Purple.png
     - assets/images/logos/Logo-Purple-S.png
     - assets/images/logos/Logo-White.png
+    - assets/icons/ai/ai_icon.png
+    - assets/images/profiles/female.jpg
+    - assets/images/profiles/male.jpg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
