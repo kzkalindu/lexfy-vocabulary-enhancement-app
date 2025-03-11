@@ -1,0 +1,2 @@
+C:/Users/Asus/Desktop/final lexfy/lexfy-vocabulary-enhancement-app/frontend/android/app/.cxx/Debug/4j4i1t3k/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Asus/Desktop/final lexfy/lexfy-vocabulary-enhancement-app/frontend/android/app/.cxx/Debug/4j4i1t3k/armeabi-v7a/CMakeFiles/rebuild_cache.dir
