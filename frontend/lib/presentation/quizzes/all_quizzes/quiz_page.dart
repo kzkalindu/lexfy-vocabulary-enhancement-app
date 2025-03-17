@@ -1,587 +1,767 @@
-// import 'dart:math';
-//
-// import 'package:flutter/material.dart';
-//
-// class QuizScreen extends StatelessWidget {
-//   const QuizScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Container(
-//         color: Color(0xFF6B68FF), // Purple background color
-//         child: Column(
-//           children: [
-//             // Status bar spacing
-//             SizedBox(height: 40),
-//
-//             // App bar with back button and larger logo
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 20),
-//               child: Row(
-//                 children: [
-//                   // Back button in the left corner
-//                   GestureDetector(
-//                     onTap: () {
-//                       Navigator.pop(context);
-//                     },
-//                     child: Container(
-//                       padding: EdgeInsets.all(10),
-//                       decoration: BoxDecoration(
-//                         color: Colors.white.withOpacity(0.2),
-//                         shape: BoxShape.circle,
-//                       ),
-//                       child: Icon(
-//                         Icons.arrow_back,
-//                         color: Colors.white,
-//                         size: 22,
-//                       ),
-//                     ),
-//                   ),
-//
-//                   // Larger centered logo
-//                   Expanded(
-//                     child: Center(
-//                       child: Image.asset(
-//                         'assets/images/logos/Logo-White.png',
-//                         height: 40, // Increased logo size
-//                       ),
-//                     ),
-//                   ),
-//
-//                   // Empty space to balance the layout
-//                   SizedBox(width: 40),
-//                 ],
-//               ),
-//             ),
-//
-//             // XP and Level indicator in one line below logo
-//             Padding(
-//               padding: const EdgeInsets.only(top: 16, left: 20, right: 20),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   // XP points display
-//                   Container(
-//                     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-//                     decoration: BoxDecoration(
-//                       color: Colors.white.withOpacity(0.15),
-//                       borderRadius: BorderRadius.circular(20),
-//                       border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-//                     ),
-//                     child: Row(
-//                       children: [
-//                         Icon(
-//                           Icons.star,
-//                           color: Colors.amber,
-//                           size: 20,
-//                         ),
-//                         SizedBox(width: 6),
-//                         Text(
-//                           '250 XP',
-//                           style: TextStyle(
-//                             color: Colors.white,
-//                             fontWeight: FontWeight.bold,
-//                             fontSize: 16,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//
-//                   SizedBox(width: 20), // Space between XP and Level
-//
-//                   // Level indicator
-//                   Container(
-//                     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-//                     decoration: BoxDecoration(
-//                       color: Colors.white.withOpacity(0.15),
-//                       borderRadius: BorderRadius.circular(20),
-//                       border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-//                     ),
-//                     child: Text(
-//                       'Level 01',
-//                       style: TextStyle(
-//                         color: Colors.white,
-//                         fontSize: 16,
-//                         fontWeight: FontWeight.w500,
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//
-//             SizedBox(height: 10), // Additional spacing
-//
-//             // Game content - scrollable list of levels with varying X positions
-//             Expanded(
-//               child: ListView.builder(
-//                 padding: EdgeInsets.symmetric(vertical: 20),
-//                 itemCount: 32, // 1 active + 1 gray + 30 locked buttons
-//                 itemBuilder: (context, index) {
-//                   // Calculate a consistent X offset for each button
-//                   // Using index ensures the same offset is used each time
-//                   final xOffset = index % 2 == 0
-//                       ? -30.0 - (index % 5 * 6)
-//                       : 30.0 + (index % 5 * 6);
-//
-//                   if (index == 0) {
-//                     // Active level button (red)
-//                     return Align(
-//                       alignment: Alignment.center + Alignment(xOffset / 100, 0),
-//                       child: Container(
-//                         margin: EdgeInsets.only(bottom: 20),
-//                         width: 60,
-//                         height: 60,
-//                         decoration: BoxDecoration(
-//                           color: Colors.red,
-//                           shape: BoxShape.circle,
-//                           boxShadow: [
-//                             BoxShadow(
-//                               color: Colors.black26,
-//                               blurRadius: 4,
-//                               offset: Offset(0, 2),
-//                             ),
-//                           ],
-//                         ),
-//                         child: Center(
-//                           child: Text(
-//                             '01',
-//                             style: TextStyle(
-//                               color: Colors.white,
-//                               fontSize: 20,
-//                               fontWeight: FontWeight.bold,
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                     );
-//                   } else if (index == 1) {
-//                     // Gray button (no lock)
-//                     return Align(
-//                       alignment: Alignment.center + Alignment(xOffset / 100, 0),
-//                       child: Container(
-//                         margin: EdgeInsets.only(bottom: 20),
-//                         width: 60,
-//                         height: 60,
-//                         decoration: BoxDecoration(
-//                           color: Colors.grey[700],
-//                           shape: BoxShape.circle,
-//                           boxShadow: [
-//                             BoxShadow(
-//                               color: Colors.black26,
-//                               blurRadius: 4,
-//                               offset: Offset(0, 2),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     );
-//                   } else {
-//                     // Locked level buttons
-//                     return Align(
-//                       alignment: Alignment.center + Alignment(xOffset / 100, 0),
-//                       child: Container(
-//                         margin: EdgeInsets.only(bottom: 20),
-//                         width: 60,
-//                         height: 60,
-//                         decoration: BoxDecoration(
-//                           color: Colors.grey[700],
-//                           shape: BoxShape.circle,
-//                           boxShadow: [
-//                             BoxShadow(
-//                               color: Colors.black26,
-//                               blurRadius: 4,
-//                               offset: Offset(0, 2),
-//                             ),
-//                           ],
-//                         ),
-//                         child: Center(
-//                           child: Icon(
-//                             Icons.lock,
-//                             color: Colors.black54,
-//                             size: 24,
-//                           ),
-//                         ),
-//                       ),
-//                     );
-//                   }
-//                 },
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:frontend/models/quiz.dart';
+import 'package:frontend/services/quiz_service.dart';
+import 'package:frontend/services/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import '../../../utils/constants.dart';
 
-// Model class for user progress
-class UserProgress {
-  final int id;
-  final int userId;
-  final int xpPoints;
-  final int currentLevel;
-  final List<int> completedLevels;
-
-  UserProgress({
-    required this.id,
-    required this.userId,
-    required this.xpPoints,
-    required this.currentLevel,
-    required this.completedLevels,
-  });
-
-  factory UserProgress.fromJson(Map<String, dynamic> json) {
-    return UserProgress(
-      id: json['id'],
-      userId: json['userId'],
-      xpPoints: json['xpPoints'],
-      currentLevel: json['currentLevel'],
-      completedLevels: List<int>.from(json['completedLevels']),
-    );
-  }
-}
-
-// Model class for quiz level
-class QuizLevel {
-  final int id;
-  final String title;
-  final bool isLocked;
-  final bool isActive;
-
-  QuizLevel({
-    required this.id,
-    required this.title,
-    required this.isLocked,
-    required this.isActive,
-  });
-
-  factory QuizLevel.fromJson(Map<String, dynamic> json) {
-    return QuizLevel(
-      id: json['id'],
-      title: json['title'],
-      isLocked: json['isLocked'],
-      isActive: json['isActive'],
-    );
-  }
-}
-
-// Service to handle API calls
-class ApiService {
-  final String baseUrl = 'http://your-backend-url.com/api'; // Replace with your actual API URL
-
-  // Get user progress
-  Future<UserProgress> getUserProgress(int userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/$userId/progress'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      return UserProgress.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load user progress');
-    }
-  }
-
-  // Get quiz levels
-  Future<List<QuizLevel>> getQuizLevels(int userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/levels?userId=$userId'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      List<dynamic> levelsJson = json.decode(response.body);
-      return levelsJson.map((json) => QuizLevel.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load quiz levels');
-    }
-  }
-
-  // Start a quiz level
-  Future<void> startQuizLevel(int userId, int levelId) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/users/$userId/levels/$levelId/start'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to start quiz level');
-    }
-  }
-}
-
-class QuizScreen extends StatefulWidget {
-  const QuizScreen({Key? key}) : super(key: key);
+class QuizPage extends StatefulWidget {
+  const QuizPage({Key? key}) : super(key: key);
 
   @override
-  State<QuizScreen> createState() => _QuizScreenState();
+  _QuizPageState createState() => _QuizPageState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
-  final ApiService _apiService = ApiService();
-  UserProgress? _userProgress;
-  List<QuizLevel> _quizLevels = [];
+class _QuizPageState extends State<QuizPage> {
+  final QuizService _quizService = QuizService();
+  final UserService _userService = UserService();
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  List<Quiz> _quizzes = [];
+  int _currentQuizIndex = 0;
+  String? _selectedAnswer;
   bool _isLoading = true;
+  bool _isAnswered = false;
+  int _correctAnswers = 0;
+  int _currentLevel = 1;
+  bool _showWelcome = true;
+  bool _showLevelSelection = false;
+  bool _hasError = false; // Track if there's a backend error
+  String _errorMessage = ''; // Store error message
+  final int _maxLevels = 60;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _syncUser().then((_) {
+      if (mounted && !_hasError) {
+        setState(() {
+          _showWelcome = true;
+        });
+        _loadQuizzes();
+      }
+    });
   }
 
-  Future<void> _loadUserData() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadQuizzes() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
+      _hasError = false; // Reset error state
     });
-
     try {
-      // Assuming user ID 1 for now - in a real app, you'd get this from authentication
-      final userId = 1;
-
-      // Load user progress
-      final userProgress = await _apiService.getUserProgress(userId);
-
-      // Load quiz levels
-      final quizLevels = await _apiService.getQuizLevels(userId);
-
+      _quizzes = await _quizService.getQuizzesByLevel(_currentLevel);
+      if (_quizzes.isEmpty) {
+        throw Exception('No quizzes available for Level $_currentLevel');
+      }
+      if (!mounted) return;
       setState(() {
-        _userProgress = userProgress;
-        _quizLevels = quizLevels;
         _isLoading = false;
+        _showWelcome = true;
       });
     } catch (e) {
-      // Handle errors - you might want to show a snackbar or dialog
-      print('Error loading data: $e');
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
+        _hasError = true;
+        _errorMessage = 'Failed to load quizzes: $e';
       });
-    }
-  }
-
-  void _handleLevelTap(QuizLevel level) async {
-    if (!level.isLocked) {
-      try {
-        // Assuming user ID 1 for now
-        await _apiService.startQuizLevel(1, level.id);
-
-        // Navigate to the quiz for this level
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => Scaffold(
-              appBar: AppBar(title: Text('Level ${level.title}')),
-              body: Center(child: Text('Quiz for level ${level.title}')),
-              // In a real app, you'd navigate to your actual quiz screen
-            ),
-          ),
-        );
-      } catch (e) {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to start level: $e')),
-        );
-      }
-    } else {
-      // Show message that level is locked
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Complete previous levels to unlock this one!')),
+        SnackBar(
+          content: Text('Error loading quizzes: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Color(0xFF6B68FF), // Purple background color
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator(color: Colors.white))
-            : Column(
-          children: [
-            // Status bar spacing
-            SizedBox(height: 40),
+  Future<void> _syncUser() async {
+    if (!mounted) return;
+    if (_auth.currentUser != null) {
+      try {
+        await _userService.syncUser(_auth.currentUser!);
+        if (!mounted) return;
+        setState(() {
+          _currentLevel = _userService.user.currentLevel;
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _hasError = true;
+          _errorMessage = 'Failed to sync user data: $e';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error syncing user data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      if (!mounted) return;
+      setState(() {
+        _hasError = true;
+        _errorMessage = 'No user logged in. Please log in to continue.';
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No user logged in. Please log in to continue.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
-            // App bar with back button and larger logo
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  // Back button in the left corner
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 22,
-                      ),
+  void _submitAnswer() {
+    if (_selectedAnswer != null && !_isAnswered) {
+      setState(() {
+        _isAnswered = true;
+        if (_selectedAnswer == _quizzes[_currentQuizIndex].options[_quizzes[_currentQuizIndex].answerIndex]) {
+          _correctAnswers++;
+          _updateXP(Constants.XP_CORRECT_ANSWER);
+        } else {
+          _updateXP(Constants.XP_WRONG_ANSWER);
+        }
+      });
+    }
+  }
+
+  void _nextQuestion() {
+    if (_currentQuizIndex < _quizzes.length - 1) {
+      setState(() {
+        _currentQuizIndex++;
+        _selectedAnswer = null;
+        _isAnswered = false;
+      });
+    } else {
+      _checkLevelCompletion();
+    }
+  }
+
+  void _checkLevelCompletion() {
+    if (_correctAnswers >= 4) {
+      _updateXP(Constants.XP_PASS_LEVEL);
+      final newLevel = _currentLevel + 1;
+      _userService.updateUserProgress(
+        currentLevel: newLevel,
+        completedLevels: [..._userService.user.completedLevels, _currentLevel],
+      );
+      if (!mounted) return;
+      setState(() {
+        _currentLevel = newLevel;
+        _currentQuizIndex = 0;
+        _correctAnswers = 0;
+        _isAnswered = false;
+        _selectedAnswer = null;
+        _showWelcome = true;
+      });
+      _loadQuizzes();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Level Completed! Moving to Level $_currentLevel'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      if (!mounted) return;
+      setState(() {
+        _currentQuizIndex = 0;
+        _correctAnswers = 0;
+        _isAnswered = false;
+        _selectedAnswer = null;
+      });
+      _loadQuizzes();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Try again! You need 4/5 correct.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _updateXP(int xp) {
+    if (_auth.currentUser != null) {
+      _userService.updateUserProgress(xpPoints: _userService.user.xpPoints + xp);
+    }
+  }
+
+  void _startQuiz() {
+    setState(() {
+      _showWelcome = false;
+    });
+  }
+
+  void _toggleLevelSelection() {
+    setState(() {
+      _showLevelSelection = !_showLevelSelection;
+    });
+  }
+
+  void _selectLevel(int level) {
+    setState(() {
+      _currentLevel = level;
+      _currentQuizIndex = 0;
+      _correctAnswers = 0;
+      _isAnswered = false;
+      _selectedAnswer = null;
+      _showWelcome = true;
+      _showLevelSelection = false;
+    });
+    _loadQuizzes();
+  }
+
+  bool _isLevelUnlocked(int level) {
+    return level <= _userService.user.currentLevel;
+  }
+
+  Widget _buildLevelSelectionScreen() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Select Level',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: _toggleLevelSelection,
+                color: Colors.deepPurple,
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: GridView.builder(
+              controller: _scrollController,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                childAspectRatio: 1.0,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: _maxLevels,
+              itemBuilder: (context, index) {
+                final level = index + 1;
+                final isUnlocked = _isLevelUnlocked(level);
+                final isCurrentLevel = level == _currentLevel;
+
+                return GestureDetector(
+                  onTap: isUnlocked ? () => _selectLevel(level) : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isCurrentLevel
+                          ? Colors.pink
+                          : (isUnlocked ? Colors.deepPurple : Colors.grey),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isCurrentLevel ? Colors.pink : Colors.deepPurple).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                  ),
-
-                  // Larger centered logo
-                  Expanded(
                     child: Center(
-                      child: Image.asset(
-                        'assets/images/logos/Logo-White.png',
-                        height: 60, // Increased logo size
+                      child: isUnlocked
+                          ? Text(
+                        level.toString().padLeft(2, '0'),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      )
+                          : Icon(
+                        Icons.lock,
+                        color: Colors.white,
+                        size: 20,
                       ),
                     ),
                   ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                  // Empty space to balance the layout
-                  SizedBox(width: 40),
-                ],
+  Widget _buildHeader() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      color: Colors.deepPurple,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Image.asset(
+            'assets/images/logos/Logo-White.png',
+            height: 40,
+          ),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(
+                  'Level ${_currentLevel.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(
+                  '${_userService.user.xpPoints} XP',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              IconButton(
+                icon: Icon(Icons.grid_view_rounded, color: Colors.white),
+                onPressed: _toggleLevelSelection,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen() {
+    return Scaffold(
+      backgroundColor: Colors.deepPurple,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: Center(
+                child: Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.all(24),
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 60,
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Error',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          _syncUser().then((_) {
+                            if (!_hasError) {
+                              _loadQuizzes();
+                            }
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 5,
+                        ),
+                        child: Text(
+                          'Retry',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // XP and Level indicator in one line below logo
-            Padding(
-              padding: const EdgeInsets.only(top: 16, left: 20, right: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // XP points display - now showing actual user's XP
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.deepPurple,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+
+    if (_hasError) {
+      return _buildErrorScreen();
+    }
+
+    if (_showLevelSelection) {
+      return Scaffold(
+        backgroundColor: Colors.deepPurple,
+        body: SafeArea(
+          child: _buildLevelSelectionScreen(),
+        ),
+      );
+    }
+
+    if (_showWelcome) {
+      return Scaffold(
+        backgroundColor: Colors.deepPurple,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: Center(
+                  child: Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.all(24),
+                    padding: EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 20,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
                         ),
-                        SizedBox(width: 6),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
-                          '${_userProgress?.xpPoints ?? 0} XP',
+                          'Welcome to Level ${_currentLevel.toString().padLeft(2, '0')}!',
                           style: TextStyle(
-                            color: Colors.white,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Complete 4 out of 5 quizzes correctly to advance to the next level!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
                             fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                        ElevatedButton(
+                          onPressed: _startQuiz,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            elevation: 5,
+                          ),
+                          child: Text(
+                            'Start Quiz',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-                  SizedBox(width: 20), // Space between XP and Level
-
-                  // Level indicator - now showing actual user's level
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+    if (_quizzes.isEmpty) {
+      return Scaffold(
+        backgroundColor: Colors.deepPurple,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    margin: EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
                     ),
                     child: Text(
-                      'Level ${_userProgress?.currentLevel.toString().padLeft(2, '0') ?? '01'}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      'No quizzes available for Level $_currentLevel',
+                      style: TextStyle(fontSize: 18),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
+          ),
+        ),
+      );
+    }
 
-            SizedBox(height: 10), // Additional spacing
-
-            // Game content - scrollable list of levels with varying X positions
+    final currentQuiz = _quizzes[_currentQuizIndex];
+    return Scaffold(
+      backgroundColor: Colors.deepPurple,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                itemCount: _quizLevels.length,
-                itemBuilder: (context, index) {
-                  final level = _quizLevels[index];
-
-                  // Calculate a consistent X offset for each button
-                  // Using index ensures the same offset is used each time
-                  final xOffset = index % 2 == 0
-                      ? -30.0 - (index % 5 * 6)
-                      : 30.0 + (index % 5 * 6);
-
-                  // Determine button appearance based on level status
-                  Color buttonColor;
-                  Widget buttonContent;
-
-                  if (level.isActive) {
-                    // Active level button (red)
-                    buttonColor = Colors.red;
-                    buttonContent = Text(
-                      level.title.padLeft(2, '0'),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
-                  } else if (!level.isLocked) {
-                    // Unlocked but not active level (gray without lock)
-                    buttonColor = Colors.grey[700]!;
-                    buttonContent = Text(
-                      level.title.padLeft(2, '0'),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
-                  } else {
-                    // Locked level (gray with lock icon)
-                    buttonColor = Colors.grey[700]!;
-                    buttonContent = Icon(
-                      Icons.lock,
-                      color: Colors.black54,
-                      size: 24,
-                    );
-                  }
-
-                  return GestureDetector(
-                    onTap: () => _handleLevelTap(level),
-                    child: Align(
-                      alignment: Alignment.center + Alignment(xOffset / 100, 0),
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 20),
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: buttonColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+              child: Container(
+                margin: EdgeInsets.all(16),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Question ${_currentQuizIndex + 1}/5',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
                         ),
-                        child: Center(child: buttonContent),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            'Level ${_currentLevel.toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              color: Colors.deepPurple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: Colors.deepPurple.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        currentQuiz.question,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  );
-                },
+                    SizedBox(height: 20),
+                    ...currentQuiz.options.map<Widget>((option) => Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: RadioListTile<String>(
+                        title: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: _selectedAnswer == option && _isAnswered
+                                ? (_selectedAnswer ==
+                                currentQuiz.options[currentQuiz.answerIndex]
+                                ? Colors.green.withOpacity(0.1)
+                                : Colors.red.withOpacity(0.1))
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: _selectedAnswer == option
+                                  ? (_isAnswered
+                                  ? (_selectedAnswer ==
+                                  currentQuiz.options[currentQuiz.answerIndex]
+                                  ? Colors.green
+                                  : Colors.red)
+                                  : Colors.pink)
+                                  : Colors.grey.withOpacity(0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: Text(
+                            option,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        value: option,
+                        groupValue: _selectedAnswer,
+                        onChanged: _isAnswered
+                            ? null
+                            : (value) => setState(() => _selectedAnswer = value),
+                        activeColor: Colors.pink,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    )),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _selectedAnswer == null
+                          ? null
+                          : (_isAnswered ? _nextQuestion : _submitAnswer),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        elevation: 5,
+                      ),
+                      child: Text(
+                        _isAnswered ? 'Next' : 'Submit',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    if (_isAnswered) ...[
+                      SizedBox(height: 20),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _selectedAnswer ==
+                              currentQuiz.options[currentQuiz.answerIndex]
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _selectedAnswer ==
+                                currentQuiz.options[currentQuiz.answerIndex]
+                                ? Colors.green
+                                : Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          _selectedAnswer ==
+                              currentQuiz.options[currentQuiz.answerIndex]
+                              ? 'Correct! Well done!'
+                              : 'Wrong. Correct answer: ${currentQuiz.options[currentQuiz.answerIndex]}',
+                          style: TextStyle(
+                            color: _selectedAnswer ==
+                                currentQuiz.options[currentQuiz.answerIndex]
+                                ? Colors.green[800]
+                                : Colors.red[800],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -590,3 +770,4 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 }
+
