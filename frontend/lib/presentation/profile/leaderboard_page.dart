@@ -10,7 +10,15 @@ class LeaderboardScreen extends StatefulWidget {
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
   List<dynamic> leaderboard = [];
   bool isLoading = true;
+  bool isError = false;
   TextEditingController searchController = TextEditingController();
+
+  List<dynamic> get filteredLeaderboard {
+    final query = searchController.text.toLowerCase();
+    return leaderboard.where((user) => 
+      user['username'].toLowerCase().contains(query)
+    ).toList();
+  }
 
   @override
   void initState() {
@@ -19,26 +27,27 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   Future<void> fetchLeaderboard() async {
-    final url = Uri.parse('http://192.168.173.167:5000/api/leaderboard'); // Replace with actual API URL
+    final url = Uri.parse('http://192.168.146.167:5000/api/leaderboard');
+
     try {
       final response = await http.get(url);
+      print("API Response: ${response.body}");
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
-        // Sort leaderboard in descending order of XP points
-        data.sort((a, b) => b['xp'].compareTo(a['xp']));
-
         setState(() {
           leaderboard = data;
           isLoading = false;
+          isError = false;
         });
+        print("Total Users: ${leaderboard.length}");
       } else {
         throw Exception('Failed to load leaderboard');
       }
     } catch (e) {
-      print('Error fetching leaderboard: $e');
+      print("Error fetching leaderboard: $e");
       setState(() {
         isLoading = false;
+        isError = true;
       });
     }
   }
@@ -46,30 +55,22 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.lightBlue[50],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 152, 79, 247),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Leaderboard',
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.grey[200],
-            child: Icon(Icons.person, color: Colors.grey[600]),
-          ),
-          SizedBox(width: 16),
-        ],
       ),
       body: Column(
         children: [
@@ -77,124 +78,215 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             padding: EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
                 controller: searchController,
                 decoration: InputDecoration(
                   hintText: 'Search users...',
-                  hintStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                  prefixIcon: Icon(Icons.search, color: Colors.blueGrey),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 onChanged: (value) {
-                  setState(() {}); // Refresh UI when searching
+                  setState(() {});
                 },
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Leaderboard',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Rankings based on XP Points',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
+          Flexible(
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: leaderboard.length,
-                    itemBuilder: (context, index) {
-                      final user = leaderboard[index];
-
-                      // Apply search filtering
-                      if (searchController.text.isNotEmpty &&
-                          !user['username']
-                              .toLowerCase()
-                              .contains(searchController.text.toLowerCase())) {
-                        return SizedBox();
-                      }
-
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              child: Text(
-                                '${index + 1}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: index < 3 ? Colors.blue : Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.grey[200],
-                              backgroundImage: user['avatar'] != null
-                                  ? NetworkImage(user['avatar'])
-                                  : null,
-                              child: user['avatar'] == null
-                                  ? Text(
-                                      user['username'][0].toUpperCase(),
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user['username'],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user['xp']} XP',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                : isError
+                    ? Center(
+                        child: Text(
+                          'Failed to load leaderboard. Please try again later.',
+                          style: TextStyle(color: Colors.red, fontSize: 16),
                         ),
-                      );
-                    },
-                  ),
+                      )
+                    : Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 208, 179, 252),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _buildPodium(leaderboard.length > 1 ? leaderboard[1] : null, 2, 'assets/images/profiles/silver.jpg'),
+                                    _buildPodium(leaderboard.isNotEmpty ? leaderboard[0] : null, 1, 'assets/images/profiles/gold.jpg'),
+                                    _buildPodium(leaderboard.length > 2 ? leaderboard[2] : null, 3, 'assets/images/profiles/bronze.jpg'),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Flexible(
+                            child: ListView.builder(
+                              itemCount: filteredLeaderboard.length > 3 ? filteredLeaderboard.length - 3 : 0,
+                              itemBuilder: (context, index) {
+                                final adjustedIndex = index + 3;
+                                
+                                if (adjustedIndex >= filteredLeaderboard.length) {
+                                  return SizedBox.shrink();
+                                }
+                                
+                                final user = filteredLeaderboard[adjustedIndex];
+                                
+                                return Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border(
+                                      bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Rank with circle
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade100,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '#${adjustedIndex + 1}',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.blue.shade800,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 16),
+                                      // User info
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              user['username'],
+                                              style: TextStyle(
+                                                fontSize: 18,  // Increased font size
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              '${user['xp']} XP',
+                                              style: TextStyle(
+                                                fontSize: 16,  // Increased font size
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
           ),
         ],
       ),
+    );
+  }
+
+  // Updated podium widget without white circles
+  Widget _buildPodium(Map<String, dynamic>? user, int rank, String medalImage) {
+    final username = user?['username'] ?? 'N/A';
+    final xp = user?['xp']?.toString() ?? '0';
+    
+    // Determine rank text for the badge
+    String rankText;
+    switch (rank) {
+      case 1:
+        rankText = "1st";
+        break;
+      case 2:
+        rankText = "2nd";
+        break;
+      case 3:
+        rankText = "3rd";
+        break;
+      default:
+        rankText = rank.toString();
+    }
+
+    return Column(
+      children: [
+        // Medal container with badge
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Main medal image - no white circle
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: AssetImage(medalImage),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            
+            // Rank badge
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    rankText,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10),
+        Text(
+          username, 
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          '$xp XP', 
+          style: TextStyle(color: Colors.grey[700]),
+        ),
+      ],
     );
   }
 
@@ -204,4 +296,3 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     super.dispose();
   }
 }
-
