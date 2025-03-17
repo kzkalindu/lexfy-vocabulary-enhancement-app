@@ -23,6 +23,13 @@ class VideoPlayerDialog extends StatefulWidget {
 
 class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
   bool _isFullScreen = false;
+  late bool _localCaptionState;
+
+  @override
+  void initState() {
+    super.initState();
+    _localCaptionState = widget.isCaptionOn;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,11 +84,11 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
             onPressed: _showSpeedOptions,
           ),
           _buildControlButton(
-            icon: widget.isCaptionOn
+            icon: _localCaptionState
                 ? Icons.closed_caption
                 : Icons.closed_caption_off,
             label: 'Captions',
-            onPressed: widget.onCaptionToggle,
+            onPressed: _toggleCaptions,
           ),
           _buildControlButton(
             icon: _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
@@ -134,6 +141,18 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
   void _setPlaybackSpeed(double speed) {
     widget.controller.setPlaybackRate(speed);
     Navigator.pop(context);
+  }
+
+  void _toggleCaptions() {
+    setState(() {
+      _localCaptionState = !_localCaptionState;
+    });
+
+    // Call parent's toggle function to update the state in parent
+    widget.onCaptionToggle();
+
+    // Since toggleCaptions doesn't exist, we need to recreate the controller
+    // This is handled in the parent component
   }
 
   void _toggleFullScreen() {
