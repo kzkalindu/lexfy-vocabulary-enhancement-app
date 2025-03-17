@@ -15,8 +15,10 @@ class ContinueWatchingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If the list is empty, don't show anything
     if (continueWatchingList.isEmpty) {
-      return const SizedBox.shrink();
+      return const SizedBox
+          .shrink(); // This will make the section completely disappear
     }
 
     return Column(
