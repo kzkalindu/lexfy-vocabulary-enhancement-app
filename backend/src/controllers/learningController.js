@@ -1,23 +1,40 @@
 const axios = require('axios');
 
-const apiKey = process.env.YOUTUBE_API_KEY || 'YOUR_YOUTUBE_API_KEY';
+const apiKey = process.env.YOUTUBE_API_KEY || 'AIzaSyCm6AnaMAh0L6a0JqSHU-BNQjYEl3VCqnk';
 
-// Topics for learning
+// English learning topics for university students
 const queries = [
-  'learn English grammar',
-  'English conversation practice',
-  'English speaking tips',
-  'English vocabulary building',
+  // Grammar and Language Structure
+  'Advanced English grammar',
+  'English grammar for academic writing',
+
+  // Speaking and Communication Skills
+  'English speaking tips for university students',
   'English pronunciation practice',
-  'English listening skills',
-  'Common English phrases',
-  'English level tests',
-  'English writing tips'
+  'Academic presentation skills in English',
+
+  // Listening and Comprehension
+  'English listening practice for advanced learners',
+  'Understanding academic English lectures',
+
+  // Writing and Academic Skills
+  'How to write a research paper in English',
+  'Essay writing tips',
+  'Academic vocabulary for essays',
+
+  // Vocabulary Building
+  'Advanced English vocabulary for students',
+  'Learn academic English words',
+
+  // Soft Skills in English
+  'Email writing skills in English',
+  'Professional communication in English'
 ];
 
 // Function to get a random query
 function getRandomQuery() {
-    return queries[Math.floor(Math.random() * queries.length)];
+    const randomIndex = Math.floor(Math.random() * queries.length);
+    return queries[randomIndex];
 }
 
 // Fetch YouTube Videos
