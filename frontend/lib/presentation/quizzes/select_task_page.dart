@@ -145,6 +145,19 @@ class _SelectTaskPageState extends State<SelectTaskPage> {
                   screenSize: screenSize,
                 ),
 
+                // Even Larger and Centered Penguin Image
+                Container(
+                  height: screenSize.height * 0.3,  // Increased to 40% of screen height
+                  width: screenSize.width * 0.8,    // Increased to 90% of screen width
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/images/other/cute-penguin.png',
+                    fit: BoxFit.contain, // Ensures the image scales properly within the container
+                    height: screenSize.height * 0.30, // Increased to 35% of screen height
+                    width: screenSize.width * 0.80,   // Increased to 85% of screen width
+                  ),
+                ),
+
                 const Spacer(),
 
                 // Footer: "Want to learn more? Go to Learning"
@@ -344,4 +357,3 @@ class _SelectTaskPageState extends State<SelectTaskPage> {
     );
   }
 }
-

@@ -84,6 +84,7 @@ flutter:
     - assets/icons/ai/ai_icon.png
     - assets/images/profiles/female.jpg
     - assets/images/profiles/male.jpg
+    - assets/images/other/cute-penguin.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
