@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Leaderboard_page.dart'; // Importing LeaderboardScreen
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
+String userEmail = ""; // Store logged-in user's email
+int userLevel = 0;
+int userXp = 0;
+int userRank = 0;
 
 class ProfileScreen extends StatefulWidget {
 
@@ -19,7 +25,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _fetchUserName();
     _loadSelectedAvatar();
+    _fetchUserEmail();  // Get email from Firebase
   }
+
+  void _fetchUserEmail() {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    setState(() {
+      userEmail = user.email ?? "";
+    });
+    _fetchUserData(userEmail);  // Fetch user stats after email is set
+  }
+}
+
+// Fetch user details from the backend
+Future<void> _fetchUserData(String email) async {
+  final String apiUrl = "http://192.168.146.167:5000/api/user/$email";
+
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        userLevel = data['level'];
+        userXp = data['xp_points'];
+        userRank = data['rank'];
+      });
+    } else {
+      print("User not found");
+    }
+  } catch (e) {
+    print("Error fetching user data: $e");
+  }
+}
 
   // Fetch user display name from Firebase Authentication
   void _fetchUserName() {
@@ -110,6 +149,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Other widget methods remain the same
+
+
   Widget _buildProfileSection() {
     return Container(
       padding: EdgeInsets.all(16),
@@ -159,49 +201,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserStatistics() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
+  return Container(
+    padding: EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.1),
+          spreadRadius: 1,
+          blurRadius: 5,
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'User Overview',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'User Overview',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildStatBox('112', 'Day Streak', Icons.local_fire_department_rounded, Colors.deepOrange)),
-              SizedBox(width: 12),
-              Expanded(child: _buildStatBox('12716', 'Total XP', Icons.flash_on_rounded, Colors.amber)),
-            ],
-          ),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _buildStatBox('Current Quiz Level', 'Level 5', Icons.emoji_events_rounded, Colors.green)),
-              SizedBox(width: 12),
-              Expanded(child: _buildStatBox('User Rank', 'Rank 1', Icons.star, Colors.purple)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _buildStatBox('112', 'Day Streak', Icons.local_fire_department_rounded, Colors.deepOrange)), // Hardcoded
+            SizedBox(width: 12),
+            Expanded(child: _buildStatBox('$userXp', 'Total XP', Icons.flash_on_rounded, Colors.amber)), // Dynamic XP
+          ],
+        ),
+        SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _buildStatBox('Current Quiz Level', 'Level $userLevel', Icons.emoji_events_rounded, Colors.green)), // Dynamic Level
+            SizedBox(width: 12),
+            Expanded(child: _buildStatBox('User Rank', 'Rank $userRank', Icons.star, Colors.purple)), // Dynamic Rank
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildLeaderboardButton(BuildContext context) {
     return ElevatedButton(
