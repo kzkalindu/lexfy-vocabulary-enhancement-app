@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const apiKey = process.env.YOUTUBE_API_KEY || 'AIzaSyCm6AnaMAh0L6a0JqSHU-BNQjYEl3VCqnk';
+const apiKey = process.env.YOUTUBE_API_KEY;
 
 // English learning topics for university students
 const queries = [
