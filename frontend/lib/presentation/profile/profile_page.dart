@@ -1,92 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'leaderboard_page.dart';  // Import the fixed LeaderboardScreen
+import 'package:frontend/services/user_service.dart';
+import 'leaderboard_page.dart';
 
 // Global variables
-String userEmail = ""; // Store logged-in user's email
+String userEmail = "";
 int userLevel = 0;
 int userXp = 0;
-int userRank = 0;
+String userRank = ''; // Changed from int to String to match UserService
 
 class ProfileScreen extends StatefulWidget {
-  // Add key parameter
   const ProfileScreen({Key? key}) : super(key: key);
+  
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String userName = "User"; // Default name
-  String selectedAvatar = "assets/images/avatars/avatar1.png"; // Default avatar
+  String userName = "User";
+  String selectedAvatar = "assets/images/avatars/avatar1.png";
   bool isLoading = false;
+  final UserService _userService = UserService();
   
   @override
   void initState() {
     super.initState();
-    _fetchUserName();
+    _fetchUserData();
     _loadSelectedAvatar();
-    _fetchUserEmail();
     
-    // Add a listener to detect when returning from leaderboard
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // This will update the UI with latest values when returning to profile
       if (mounted) {
         setState(() {});
       }
     });
   }
   
-  void _fetchUserEmail() {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      setState(() {
-        userEmail = user.email ?? "";
-      });
-      _fetchUserData(userEmail);  // Fetch user stats after email is set
-    }
-  }
-  
-  // Fetch user details from the backend
-  Future<void> _fetchUserData(String email) async {
+  Future<void> _fetchUserData() async {
     setState(() {
       isLoading = true;
     });
     
-    // Replace with your actual API endpoint
-    final String apiUrl = "https://'http://192.168.146.167'/api/user/$email";  
     try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          userLevel = data['level'];
-          userXp = data['xp_points'];
-          userRank = data['rank'];
-          isLoading = false;
-        });
-      } else {
-        print("User not found");
-        setState(() {
-          isLoading = false;
-        });
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        userEmail = user.email ?? "";
+        userName = user.displayName ?? "User";
+        
+        await _userService.syncUser(user);
+        
+        if (mounted) {
+          setState(() {
+            userLevel = _userService.user.currentLevel;
+            userXp = _userService.user.xpPoints;
+            userRank = _userService.user.rank; // Now String instead of int
+            isLoading = false;
+          });
+        }
       }
     } catch (e) {
-      print("Error fetching user data: $e");
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          userLevel = 1;
+          userXp = 0;
+          userRank = 'Newbie'; // Match default from UserService
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching user data: $e')),
+        );
+      }
     }
-  }
-  
-  // Fetch user display name from Firebase Authentication
-  void _fetchUserName() {
-    User? user = FirebaseAuth.instance.currentUser;
-    setState(() {
-      userName = user?.displayName ?? "User"; // Default to "User" if null
-    });
   }
   
   // Load selected avatar from SharedPreferences
@@ -164,7 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   
-  // Sign out function
   Future<void> _signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -205,7 +188,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : SingleChildScrollView(
             child: Column(
               children: [
-                // Profile header
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -217,7 +199,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Avatar and edit button
                       Stack(
                         children: [
                           CircleAvatar(
@@ -253,7 +234,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                       SizedBox(height: 15),
-                      // User name
                       Text(
                         userName,
                         style: TextStyle(
@@ -263,7 +243,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       SizedBox(height: 5),
-                      // User email
                       Text(
                         userEmail,
                         style: TextStyle(
@@ -275,7 +254,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 
-                // Stats section
                 Container(
                   padding: EdgeInsets.all(20),
                   child: Column(
@@ -290,10 +268,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       SizedBox(height: 15),
-                      // Stats cards
                       Row(
                         children: [
-                          // Level card
                           Expanded(
                             child: _buildStatCard(
                               'Level',
@@ -303,7 +279,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           SizedBox(width: 15),
-                          // XP card
                           Expanded(
                             child: _buildStatCard(
                               'XP',
@@ -313,11 +288,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           SizedBox(width: 15),
-                          // Rank card
                           Expanded(
                             child: _buildStatCard(
                               'Rank',
-                              userRank > 0 ? userRank.toString() : '-',
+                              userRank.isNotEmpty ? userRank : 'Newbie', // Updated to handle String
                               Icons.bar_chart,
                               Colors.green,
                             ),
@@ -328,7 +302,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 
-                // Leaderboard button
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: ElevatedButton(
@@ -364,7 +337,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 
-                // Settings section
                 Container(
                   padding: EdgeInsets.all(20),
                   child: Column(
@@ -379,38 +351,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       SizedBox(height: 15),
-                      // Settings options
-                      _buildSettingsOption(
-                        'Edit Profile',
-                        Icons.person,
-                        () {
-                          // Navigate to edit profile screen
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen()));
-                        },
-                      ),
-                      _buildSettingsOption(
-                        'Notifications',
-                        Icons.notifications,
-                        () {
-                          // Navigate to notifications settings
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
-                        },
-                      ),
+                    
                       _buildSettingsOption(
                         'Privacy',
                         Icons.lock,
-                        () {
-                          // Navigate to privacy settings
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => PrivacyScreen()));
-                        },
+                        () {},
                       ),
                       _buildSettingsOption(
                         'Help & Support',
                         Icons.help,
-                        () {
-                          // Navigate to help screen
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => HelpScreen()));
-                        },
+                        () {},
                       ),
                     ],
                   ),
@@ -485,7 +435,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
           ],
         ),
-      ),
-    );
-  }
+     ),
+);
+}
 }
