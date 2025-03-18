@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "lexfy-app-ae809",
+  "private_key_id": "5d07522f701270edbffbeaed761b1486b0d6b947",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsWPE4Jaf6vHpc\nl3PyG1ECLwh+B+KsvtVOS2jE3+NHvbgkgyrxNo2KwHpoiDjSpMG86dYUexN0KO5v\nKeDvLXHOaoMb4geeYvQKlh0gTxBAZdOUJB1bcW9sIGR7zGPrukHIZzKGxDZWL5Ug\nceV/JovA9OApVdlTexwarsiMqq0HVblhnBUSi4l84xR+9Ym9nJHNbRX4YBGbxRK2\naqxX1rUSCUCTTpxASzkoJEfOlBoY5xkM5JfVl7AZ1/9HLESOuGo8SP4/egpW8vGZ\nz3k69UBxZfirX6Yv9MMQYbYz9FizsM0P4RFfTovTv5DGnAW0JQ5IaHKLsdu1ZZfs\ngSdZJLwBAgMBAAECggEAU0z56iVpN2t5yN77D33cfa218RRmnw/tkVYpYV7FP5uX\nMS6kxsmTSAkYIQYWUNmJOoHbEzMZh/9wnxIiwfe5FgetLwDkpc02HxfHJCKSvE17\nIhMCjXwaWqydZKi5cuoneXFHnpOfn7CH55KlVfuPeMfiwJfZ3tuWDd+E11h3IR+l\nuhyamGHk7BAj/l+L3s/V1KhWn59eJ9SFWtT7zkZy5u8iBvuq6vApJlVg1ifG7DoR\nABH1kaY39GXXHQqL6/XpGoC+mJ1iRs4+tsjQKq0RfsHe6BNVMij8ygeiJb5aGtfR\ngVyuq6trGck4gw43sEsI0XuyYENn0gK/xQwY8Ej+8QKBgQDpVZNByfaziSAJVJKK\nlKN9VgxMzWDpDI0AiS9YFO5wedSLXJL+7walqU5uFkhKcm1x8TxPjxpO8BaZB+3g\nrzNsgktVeB8LCaFldpEVqvhZSn8VTs24d+OymseyCWRV4Sy5LYuvQTJ0aiqfxakH\n0ymHFz7M/iONoAXKkpuD26pfHwKBgQC9FsfXemTRs5VloSDvEwZtCgeRd+MmC13a\nIFi5xm3NdQy2Ec0nI9r+k2AGLHm9UhfJvuLpK+seKOaD3i8G4SdEALVFAXKjMzGg\nyVhjeDej6Z1MNzbBWpc7K/TjDU1iulHOTmLUx54GXb9WFsfHvhyXBzrg13EUmBXK\nYPIJSSgg3wKBgQCeemDp7iKBDkGUFLzzIsFn/2mbQGLx5nReSM6/JHhOLHEPtnCg\ndfgtzDBY1QmEhvOO0CoGX0ufEbJHffsy/8wNhvFju5JaDNBx+XXRIa5L9y0Za8yN\n3d/pDvdTFM3xBl855pVZEw8Rwonwum9zwRgTiNY+pN3A8077p1e41xmAQQKBgAVr\nH7LnCPiRYtiUs3LmYqrBPNJIUzQF41yazLAWJZNbpU+aVvymJGJjKr9CiwKH1bKs\nS6hO39/vYBurREG4Nf3W31ro3bYbg3KOEoBXM5D44s8KTgFgbTD+43eWK/+GQ03c\nJSzfw4F/MjpvUK5CnmMdi+xhgBYM/aLdAFKPzByVAoGBAIW6EEqOIoQpbm/TEJ/7\nF42W2pB6hVwKWqJntJ/cNTKliY0repUKV4Y5jScdHzl0126VSGAskyUUgUFmiyJT\nSkdZ3vxGRNem2G9wewMyqZhLuAkassxgWHuOe8GPt+6so363zyMrZ9cU4kBNZSRm\nXsN3ZYp8bRNIpEjB7kHugbl2\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@lexfy-app-ae809.iam.gserviceaccount.com",
+  "client_id": "100843162940314055127",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40lexfy-app-ae809.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

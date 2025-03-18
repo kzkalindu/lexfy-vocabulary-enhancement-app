@@ -47,6 +47,11 @@ dependencies:
   http_parser: ^4.0.2
   shared_preferences: ^2.5.2
   cloud_firestore: ^5.6.5
+  web_socket_channel: ^3.0.2
+  permission_handler: ^11.0.1
+  flutter_svg: ^2.0.17
+  audioplayers: ^6.4.0
+  flutter_tts: ^3.8.5
 
 
 
@@ -85,6 +90,36 @@ flutter:
     - assets/images/profiles/female.jpg
     - assets/images/profiles/male.jpg
     - assets/images/other/cute-penguin.png
+    - assets/icons/ai/Ordering_a_Coffee.svg
+    - assets/icons/ai/Discussing_a_Deadline.svg
+    - assets/icons/ai/Booking_a_Dentist.svg
+    - assets/icons/ai/Asking_for_Directions.svg
+    - assets/icons/ai/Asking_for_a_Discount.svg
+    - assets/icons/ai/Visiting_a_Doctor.svg
+    - assets/icons/ai/Ordering_Fast_Food.svg
+    - assets/icons/ai/Booking_a_Flight.svg
+    - assets/icons/ai/Discussing_Future_Goals.svg
+    - assets/icons/ai/Asking_for_Help.svg
+    - assets/icons/ai/Booking_a_Room.svg
+    - assets/icons/ai/Asking_for_Medicine.svg
+    - assets/icons/ai/Scheduling_a_Meeting.svg
+    - assets/icons/ai/Buying_a_Smartphone.svg
+    - assets/icons/ai/Asking_for_a_Promotion.svg
+    - assets/icons/ai/Renting_a_Car.svg
+    - assets/icons/ai/Booking_a_Restaurant.svg
+    - assets/icons/ai/Returning_a_Product.svg
+    - assets/icons/ai/salon.svg
+    - assets/icons/ai/Making_Small_Talk.svg
+    - assets/icons/ai/Describing_a_Symptom.svg
+    - assets/icons/ai/Taking_a_Taxi.svg
+    - assets/icons/ai/Asking_for_a_Promotion.svg
+    - assets/icons/ai/Talking_about_Weather.svg
+    - assets/icons/ai/Checking_into_a_Hotel.svg
+    - assets/icons/ai/Scheduling_a_Checkup.svg
+    - assets/icons/ai/Asking_about_Transport.svg
+    - assets/icons/ai/Calling_an_Ambulance.svg
+    - assets/icons/ai/Small_Talk.svg
+    - assets/icons/ai/ai_icon.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
