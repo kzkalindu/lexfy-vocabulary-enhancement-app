@@ -32,8 +32,7 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
   final Random _random = Random(); // Random number generator
 
   // Backend URL
-  final String backendUrl = 'http://localhost:5000/api/learning/videos';
-
+  final String backendUrl = 'http://192.168.146.163:5000/api/learning/videos';
   // Number of requests to make to ensure variety
   final int numberOfRequests =
       5; // Adjust this based on how many different categories you want
