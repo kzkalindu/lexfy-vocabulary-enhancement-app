@@ -33,8 +33,7 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
 
   // Backend URL
 
-  final String backendUrl = 'http://localhost:5001/api/learning/videos';
-
+  final String backendUrl = 'http://localhost:5000/api/learning/videos';
 
   // Number of requests to make to ensure variety
   final int numberOfRequests =
@@ -204,42 +203,47 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
 
       // For testing purposes, add some mock data if the API fails
       final List<Map<String, String>> mockVideos = [
-        {
-          "id": "dQw4w9WgXcQ",
-          "title": "Advanced English Grammar: Verb Tenses",
-          "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg",
-          "category": "grammar",
-        },
-        {
-          "id": "9bZkp7q19f0",
-          "title": "English Speaking Tips for University",
-          "thumbnail": "https://img.youtube.com/vi/9bZkp7q19f0/0.jpg",
-          "category": "speaking",
-        },
-        {
-          "id": "jNQXAC9IVRw",
-          "title": "Academic Writing: How to Write an Essay",
-          "thumbnail": "https://img.youtube.com/vi/jNQXAC9IVRw/0.jpg",
-          "category": "writing",
-        },
-        {
-          "id": "kJQP7kiw5Fk",
-          "title": "Advanced English Vocabulary for Students",
-          "thumbnail": "https://img.youtube.com/vi/kJQP7kiw5Fk/0.jpg",
-          "category": "vocabulary",
-        },
-        {
-          "id": "hT_nvWreIhg",
-          "title": "English Listening Practice: Academic Lectures",
-          "thumbnail": "https://img.youtube.com/vi/hT_nvWreIhg/0.jpg",
-          "category": "listening",
-        },
-        {
-          "id": "fKopy74weus",
-          "title": "Professional Email Writing in English",
-          "thumbnail": "https://img.youtube.com/vi/fKopy74weus/0.jpg",
-          "category": "professional",
-        },
+      {
+        "id": "axYAW7PuSIM",
+        "title":
+        "English study plan - 20-minute daily English learning routine - Marina Mogilko",
+      "thumbnail": "https://img.youtube.com/vi/axYAW7PuSIM/0.jpg",
+      "category": "grammar",
+    },
+      {
+      "id": "2r3wiPc",
+      "title":
+      "Improve your English with this study PLAN: Intermediate to Advanced ",
+      "thumbnail": "https://img.youtube.com/vi/2r3wiPc/0.jpg",
+      "category": "speaking",
+      },
+      {
+      "id": "uPACgfqVVy4",
+      "title":
+      "100 Common English Questions and Answers | How to Ask and Answer Questions in English",
+      "thumbnail": "https://img.youtube.com/vi/uPACgfqVVy4/0.jpg",
+      "category": "writing",
+      },
+      {
+      "id": "BAJMNQXzrgg",
+      "title":
+      "How to improve your English speaking skills FAST (4 simple steps)",
+      "thumbnail": "https://img.youtube.com/vi/BAJMNQXzrgg/0.jpg",
+      "category": "vocabulary",
+      },
+      {
+      "id": "eAGtfIjhP1k",
+      "title":
+      "Plural Nouns Pronunciation - /s/ /z/ or /iz/? (pronounce PERFECTLY every time!) ",
+      "thumbnail": "https://img.youtube.com/vi/eAGtfIjhP1k/0.jpg",
+      "category": "listening",
+      },
+      {
+      "id": "8xgKH00iyt8",
+      "title": "Prepositions Simplified Correct Usage of 'Work In At As For' for English Learners",
+      "thumbnail": "https://img.youtube.com/vi/8xgKH00iyt8/0.jpg",
+      "category": "professional",
+      },
       ];
 
       // Shuffle the mock videos

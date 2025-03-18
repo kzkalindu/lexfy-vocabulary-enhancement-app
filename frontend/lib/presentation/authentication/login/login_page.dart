@@ -37,6 +37,11 @@
 //     }
 //   }
 //
+//   void continueAsGuest() {
+//     // Navigate to home screen without authentication
+//     Navigator.pushReplacementNamed(context, '/home');
+//   }
+//
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
@@ -196,21 +201,6 @@
 //                     borderRadius: BorderRadius.circular(8),
 //                   ),
 //                 ),
-//                 // child: Row(
-//                 //   mainAxisAlignment: MainAxisAlignment.center,
-//                 //   children: [
-//                 //     Image.asset('assets/icons/auth/Google.png', height: 24),
-//                 //     SizedBox(width: 12),
-//                 //     Text(
-//                 //       'Continue with Google',
-//                 //       style: TextStyle(
-//                 //         color: Colors.black87,
-//                 //         fontSize: 16,
-//                 //         fontWeight: FontWeight.w500,
-//                 //       ),
-//                 //     ),
-//                 //   ],
-//                 // ),
 //                 child: Row(
 //                   mainAxisAlignment: MainAxisAlignment.center,
 //                   children: [
@@ -229,6 +219,32 @@
 //                       ),
 //                     ),
 //                   ],
+//                 ),
+//               ),
+//               SizedBox(height: 20),
+//               // Guest login text button (more subtle UI)
+//               Center(
+//                 child: TextButton(
+//                   onPressed: continueAsGuest,
+//                   child: Row(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       FaIcon(
+//                         FontAwesomeIcons.userAlt,
+//                         color: Colors.grey.shade600,
+//                         size: 16,
+//                       ),
+//                       SizedBox(width: 8),
+//                       Text(
+//                         'Continue as Guest',
+//                         style: TextStyle(
+//                           color: Colors.grey.shade600,
+//                           fontSize: 14,
+//                           fontWeight: FontWeight.w500,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
 //                 ),
 //               ),
 //               Spacer(),
@@ -283,31 +299,89 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   Future<void> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    await _auth.signInWithCredential(credential);
-    Navigator.pushReplacementNamed(context, '/home');
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in
+        return;
+      }
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await _auth.signInWithCredential(credential);
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google Sign-In failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void signIn() async {
     try {
       await _auth.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
       Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'Invalid credentials. Please check and try again.';
+          break;
+        default:
+          errorMessage = 'Login failed: ${e.message}';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
     } catch (e) {
-      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An unexpected error occurred: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void continueAsGuest() {
-    // Navigate to home screen without authentication
-    Navigator.pushReplacementNamed(context, '/home');
+  void continueAsGuest() async {
+    try {
+      await _auth.signInAnonymously();
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Guest login failed: ${e.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An unexpected error occurred: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -490,7 +564,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              // Guest login text button (more subtle UI)
               Center(
                 child: TextButton(
                   onPressed: continueAsGuest,
