@@ -170,7 +170,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.chat_bubble_outline, size: 20),
-        label: 'Talk with Lexfy',
+        label: 'Lexfy',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.book, size: 20),

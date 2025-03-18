@@ -5,7 +5,7 @@ import 'dart:io';
 
 /// Base URL for the words API endpoints
 final String baseApiUrl = Platform.isAndroid
-    ? 'http://192.168.146.163:5000/api/words'
+    ? 'http://172.20.10.8:5000/api/words'
     : 'http://localhost:5000/api/words';
 
 /// Main home screen widget that displays word-related content
