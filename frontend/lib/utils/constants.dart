@@ -7,4 +7,5 @@ class Constants {
   static const int RANKS_EXPERT_XP = 1500;
   static const int RANKS_MASTER_XP = 3000;
   // static const String apiBaseUrl = 'http://10.0.2.2:3000/api';
+  static const String baseUrl = 'http://192.168.146.167';
 }
