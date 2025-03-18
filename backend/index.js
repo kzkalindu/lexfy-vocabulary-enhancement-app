@@ -1,23 +1,23 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const testRoutes = require('./src/routes/test.routes');
-const lexfyRoutes = require('./src/routes/lexfy.routes');
-const learningRoutes = require('./src/routes/learning.routes');
+import express from 'express';
+import cors from 'cors';
+import { router as topicRoutes } from './src/routes/topicRoutes.js';
+import { initializeWebSocketServer } from './src/config/websocket.js';
 
-const wordRoutes = require('./src/routes/word.routes');
+import { router as learningRoutes } from './src/routes/learning.routes.js';
+import { router as wordRoutes } from './src/routes/word.routes.js';
+import dotenv from 'dotenv';
 
-
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes for Test & Lexfy Databases
-app.use('/api/test', testRoutes);
-app.use('/api/lexfy', lexfyRoutes);
+
 
 // Route for Learning Module (YouTube Videos)
 app.use('/api/learning', learningRoutes);
@@ -25,7 +25,12 @@ app.use('/api/learning', learningRoutes);
 // Add the new word routes
 app.use('/api/words', wordRoutes);
 
+// Routes for Topics
+app.use('/api/topics', topicRoutes);
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  initializeWebSocketServer(server); // Initialize WebSocket server with HTTP server instance
 });
+
+console.log("🟢 WebSocket Server Started...");

@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { getVideos } = require('../controllers/learningController');
+import { getVideos } from '../controllers/learningController.js';
 
 // Route for fetching videos
 router.get('/videos', getVideos);
 
-module.exports = router;
+export { router };

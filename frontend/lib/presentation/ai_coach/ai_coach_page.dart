@@ -1,42 +1,74 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import 'chat_screen.dart';
 
 class AiCoachScreenChooseTopic extends StatefulWidget {
   const AiCoachScreenChooseTopic({super.key});
 
   @override
-  _AiCoachScreenChooseTopicState createState() => _AiCoachScreenChooseTopicState();
+  _AiCoachScreenChooseTopicState createState() =>
+      _AiCoachScreenChooseTopicState();
 }
 
 class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   int? _selectedIndex;
+  List<Map<String, dynamic>> topics = [];
+  late Future<void> _fetchTopicsFuture;
 
-  final List<Map<String, dynamic>> topics = [
-    {"title": "Ordering Coffee", "icon": Icons.shopping_cart_outlined},
-    {"title": "Booking a Flight", "icon": Icons.flight_outlined},
-    {"title": "Asking for Directions", "icon": Icons.map_outlined},
-    {"title": "Small Talk", "icon": Icons.chat_bubble_outline},
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTopics();
+  }
+
+  // ✅ Fetch topics from backend
+  Future<void> _fetchTopics() async {
+    try {
+      const String backendUrl = "http://172.20.10.6:5001/api/topics/data"; // Change IP if needed
+      final response = await http.get(Uri.parse(backendUrl));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          topics = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+        });
+      } else {
+        print("❌ Failed to load topics");
+      }
+    } catch (e) {
+      print("❌ Error fetching topics: $e");
+    }
+  }
 
   void _selectRandomTopic() {
-    setState(() {
-      _selectedIndex = (topics..shuffle()).indexOf(topics.first);
-    });
+    if (topics.isNotEmpty) {
+      setState(() {
+        _selectedIndex = (topics..shuffle()).indexOf(topics.first);
+      });
 
+      _navigateToChat(topics[_selectedIndex!]["name"]);
+    }
+  }
+
+  void _navigateToChat(String topic) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatScreen(topic: topics[_selectedIndex!]["title"]),
+        builder: (context) => ChatScreen(topic: topic),
       ),
     );
   }
 
   Widget _buildTopicCard({
     required String title,
-    required IconData icon,
+    required String iconPath,
     required int index,
   }) {
     bool isSelected = _selectedIndex == index;
+    Color textColor = isSelected ? Colors.white : const Color(0xFF636AE8);
+    Color iconColor = isSelected ? Colors.white : const Color(0xFF636AE8);
 
     return GestureDetector(
       onTap: () {
@@ -46,7 +78,7 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ?  Color(0xFF636AE8) : const Color(0xFFF3F0FF),
+          color: isSelected ? const Color(0xFF636AE8) : const Color(0xFFF3F0FF),
           borderRadius: BorderRadius.circular(16),
         ),
         child: LayoutBuilder(
@@ -56,19 +88,19 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    icon,
-                    size: constraints.maxHeight * 0.25, // Responsive icon size
-                    color: isSelected ? Colors.white : Colors.deepPurple,
+                  SvgPicture.asset(
+                    iconPath,
+                    height: constraints.maxHeight * 0.25,
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
                   ),
                   const SizedBox(height: 8),
                   Flexible(
                     child: Text(
                       title,
                       style: TextStyle(
-                        fontSize: constraints.maxHeight * 0.12, // Responsive font size
+                        fontSize: constraints.maxHeight * 0.12,
                         fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black,
+                        color: textColor,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -88,23 +120,6 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Talk with Lexfy',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -137,19 +152,22 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
+                    child: topics.isEmpty
+                        ? const Center(child: CircularProgressIndicator()) // ✅ Show loading spinner
+                        : GridView.builder(
                       itemCount: topics.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
-                        childAspectRatio: constraints.maxWidth / (constraints.maxHeight * 0.5),
+                        childAspectRatio: constraints.maxWidth /
+                            (constraints.maxHeight * 0.5),
                       ),
                       itemBuilder: (context, index) {
                         return _buildTopicCard(
-                          title: topics[index]["title"],
-                          icon: topics[index]["icon"],
+                          title: topics[index]["name"],
+                          iconPath: topics[index]["icon_svg"],
                           index: index,
                         );
                       },
@@ -162,9 +180,10 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   child: Row(
                     children: [
+                      // Random Topic Button
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _selectRandomTopic,
+                          onPressed: topics.isNotEmpty ? _selectRandomTopic : null,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             side: const BorderSide(color: Color(0xFF636AE8)),
@@ -183,18 +202,12 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
                         ),
                       ),
                       const SizedBox(width: 16),
+
+                      // Choose Topic Button (Enabled only if a topic is selected)
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _selectedIndex != null
-                              ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                    topic: topics[_selectedIndex!]["title"]),
-                              ),
-                            );
-                          }
+                              ? () => _navigateToChat(topics[_selectedIndex!]["name"])
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _selectedIndex != null

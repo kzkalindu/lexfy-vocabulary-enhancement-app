@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from  'axios';
 
 // Curated list of academic verbs relevant for university students
 const academicVerbs = [
@@ -167,7 +167,4 @@ const searchWord = async (req, res) => {
     }
 };
 
-module.exports = {
-    getRandomWords,
-    searchWord
-}; 
+export { getRandomWords, searchWord };
