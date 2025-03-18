@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
+/// Base URL for the words API endpoints
+final String baseApiUrl = Platform.isAndroid
+    ? 'http://192.168.146.163:5000/api/words'
+    : 'http://localhost:5000/api/words';
+
+/// Main home screen widget that displays word-related content
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -9,14 +16,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+/// State class for the HomeScreen widget
 class _HomeScreenState extends State<HomeScreen> {
-  // CONTROLLERS
+  // PROPERTIES
   final TextEditingController _searchController = TextEditingController();
-
-  // STATE VARIABLES
   String _word = '';
   String _definition = '';
   String _example = '';
+  String _partOfSpeech = '';
+  bool _isLoading = false;
+  String _errorMessage = '';
   List<Map<String, String>> _wordList = [];
   List<Map<String, String>> _dailyWordList = [];
 
@@ -28,140 +37,192 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // API METHODS
+  /// Fetches random daily words from the API
   Future<void> _fetchRandomWords() async {
-    final randomWordsApiUrl =
-        'https://random-word-api.herokuapp.com/word?number=25';
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
 
     try {
-      final response = await http.get(Uri.parse(randomWordsApiUrl));
+      final response = await http.get(
+        Uri.parse('$baseApiUrl/random'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        final List<dynamic> randomWords = jsonDecode(response.body);
-
-        for (String word in randomWords) {
-          await _fetchWordDetails(word);
-        }
-      }
-    } catch (e) {
-      print('Error fetching random words: $e');
-    }
-  }
-
-  Future<void> _fetchWordDetails(String word) async {
-    final apiUrl = 'https://api.dictionaryapi.dev/api/v2/entries/en/$word';
-
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final List<dynamic> words = json.decode(response.body);
         setState(() {
-          _dailyWordList.add({
-            'word': word,
-            'definition': data[0]['meanings'][0]['definitions'][0]
-                    ['definition'] ??
-                'No definition found',
-            'example': data[0]['meanings'][0]['definitions'][0]['example'] ??
-                'No example available',
-          });
-        });
-      }
-    } catch (e) {
-      print('Error fetching details for $word: $e');
-    }
-  }
-
-  Future<void> _searchWord(String word) async {
-    final apiUrl = 'https://api.dictionaryapi.dev/api/v2/entries/en/$word';
-
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _word = word;
-          _definition = data[0]['meanings'][0]['definitions'][0]
-                  ['definition'] ??
-              'No definition found';
-          _example = data[0]['meanings'][0]['definitions'][0]['example'] ??
-              'No example available';
-          _wordList.add({
-            'word': _word,
-            'definition': _definition,
-            'example': _example,
-          });
+          _dailyWordList = words
+              .map((word) => {
+                    'word': word['word']?.toString() ?? '',
+                    'definition': word['definition']?.toString() ??
+                        'No definition available',
+                    'example': word['example']?.toString() ?? '',
+                    'partOfSpeech': word['partOfSpeech']?.toString() ?? '',
+                  })
+              .toList();
         });
       } else {
+        throw Exception('Failed to load words');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to fetch words. Please try again later.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// Searches for a specific word using the API
+  Future<void> _searchWord(String word) async {
+    if (word.trim().isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter a word';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseApiUrl/search/${Uri.encodeComponent(word)}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         setState(() {
-          _word = word;
-          _definition = 'Word not found.';
-          _example = '';
+          _word = data['word'] ?? '';
+          _definition = data['definition'] ?? 'No definition available';
+          _example = data['example'] ?? '';
+          _partOfSpeech = data['partOfSpeech'] ?? '';
+
+          if (!_wordList.any((item) => item['word'] == _word)) {
+            _wordList.add({
+              'word': _word,
+              'definition': _definition,
+              'example': _example,
+            });
+          }
+        });
+
+        _showWordDetails();
+      } else {
+        final errorData = jsonDecode(response.body);
+        setState(() {
+          _errorMessage = errorData['error'] ?? 'Word not found';
         });
       }
     } catch (e) {
       setState(() {
-        _word = word;
-        _definition = 'Error fetching data.';
-        _example = '';
+        _errorMessage = 'An error occurred. Please try again later.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
-
-    _showWordDetails();
   }
 
   // UI HELPER METHODS
+  /// Shows a dialog with detailed word information
   void _showWordDetails() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(_word),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('(n.) $_definition',
-                  style: const TextStyle(fontStyle: FontStyle.italic)),
-              const SizedBox(height: 12),
-              Text('Example: $_example',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Text(
+              _word,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF636AE8),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _partOfSpeech,
+              style: TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey[600],
+              ),
             ),
           ],
-        );
-      },
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Definition:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(_definition),
+              if (_example.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Example:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _example,
+                  style: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Color(0xFF636AE8),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 
   // UI COMPONENTS
+  /// Builds the search bar widget
   Widget _buildSearchBar() {
     return TextField(
       controller: _searchController,
       decoration: InputDecoration(
-        hintText: "Search for Words…",
-        hintStyle: TextStyle(color: Colors.grey[600]),
-        prefixIcon: const Icon(Icons.search, color: Color(0xFF636AE8)),
-        filled: true,
-        fillColor: Colors.grey[50],
+        hintText: 'Search for a word...',
+        prefixIcon: const Icon(Icons.search),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(30),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: BorderSide(color: Colors.grey[200]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: const BorderSide(color: Color(0xFF636AE8)),
-        ),
+        filled: true,
+        fillColor: const Color.fromARGB(84, 255, 255, 255),
       ),
       onSubmitted: (value) {
         if (value.isNotEmpty) {
@@ -171,17 +232,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Builds the row of action buttons
   Widget _buildActionButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildActionButtonContainer("Learnings", '/daily_challenge_screen'),
-        _buildActionButtonContainer("Quizzes", '/quizzes_screen'),
+        _buildActionButtonContainer("Learnings", '/learning'),
+        _buildActionButtonContainer("Quizzes", '/all_quizzes'),
         _buildActionButtonContainer("Talk with Lexfy", '/ai_coach'),
       ],
     );
   }
 
+  /// Builds a container for an action button with margin
   Widget _buildActionButtonContainer(String label, String route) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -190,20 +253,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Builds a styled action button
   Widget _buildActionButton(String label, VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF636AE8),
+        backgroundColor: const Color.fromARGB(255, 102, 108, 224),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 15)),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 15,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 
+  /// Builds the daily word list section
   Widget _buildDailyWordList() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,6 +290,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+        if (_isLoading)
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -229,6 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Builds a card widget for displaying a word and its details
   Widget _buildWordCard(int index) {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -287,7 +366,18 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(vertical: 24.0),
         child: Column(
           children: [
-            _buildSearchBar(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildSearchBar(),
+            ),
+            if (_errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  _errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             const SizedBox(height: 24),
             _buildActionButtons(),
             const SizedBox(height: 24),

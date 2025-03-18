@@ -43,6 +43,8 @@ class LexfyApp extends StatelessWidget {
         '/learning': (context) => const LearningPage(),
         '/profile': (context) => ProfileScreen(),
         '/leaderboard': (context) => LeaderboardScreen(),
+        '/all_quizzes': (context) => const SelectTaskPage(),
+        '/ai_coach': (context) => AiCoachScreenChooseTopic(),
       },
     );
   }
