@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const apiKey = process.env.YOUTUBE_API_KEY;
 
@@ -60,4 +60,4 @@ const getVideos = async (req, res) => {
     }
 };
 
-module.exports = { getVideos };
+export  { getVideos };

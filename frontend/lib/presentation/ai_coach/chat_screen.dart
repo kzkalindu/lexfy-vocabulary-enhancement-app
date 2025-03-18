@@ -102,7 +102,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   void _connectWebSocket() {
     String serverIp = "172.20.10.6";
-    String wsUrl = "ws://$serverIp:5000";
+    String wsUrl = "ws://$serverIp:5001";
     print("Connecting to WebSocket: $wsUrl");
 
     _channel = IOWebSocketChannel.connect(wsUrl);

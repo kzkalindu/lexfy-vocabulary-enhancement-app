@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     
     // Replace with your actual API endpoint
-    final String apiUrl = "https://'http://192.168.146.167'/api/user/$email";  
+    final String apiUrl = "https://172.20.10.6:5001'/api/user/$email";
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {

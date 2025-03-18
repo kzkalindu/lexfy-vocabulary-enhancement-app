@@ -1,8 +1,8 @@
 import express from 'express';
+const router = express.Router();
 import { getTopics } from '../controllers/topicController.js';
 
-const router = express.Router();
+// Route for fetching topics
+router.get('/data', getTopics);
 
-router.get('/topics', getTopics);
-
-export default router;
+export { router };

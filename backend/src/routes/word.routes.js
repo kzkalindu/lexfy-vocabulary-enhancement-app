@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { getRandomWords, searchWord } = require('../controllers/wordController');
+import { getRandomWords, searchWord } from '../controllers/wordController.js';
 
 router.get('/random', getRandomWords);
 router.get('/search/:word', searchWord);
 
-module.exports = router; 
+export { router };

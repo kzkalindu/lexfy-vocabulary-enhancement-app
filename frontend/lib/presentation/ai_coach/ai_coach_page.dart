@@ -15,6 +15,8 @@ class AiCoachScreenChooseTopic extends StatefulWidget {
 class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   int? _selectedIndex;
   List<Map<String, dynamic>> topics = [];
+  late Future<void> _fetchTopicsFuture;
+
 
   @override
   void initState() {
@@ -25,7 +27,7 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   // ✅ Fetch topics from backend
   Future<void> _fetchTopics() async {
     try {
-      const String backendUrl = "http://172.20.10.6:5000/api/topics"; // Change IP if needed
+      const String backendUrl = "http://172.20.10.6:5001/api/topics/data"; // Change IP if needed
       final response = await http.get(Uri.parse(backendUrl));
 
       if (response.statusCode == 200) {
@@ -118,23 +120,6 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Talk with Lexfy',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
