@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Create ApiConstants class
+class ApiConstants {
+  static const String baseUrl = 'http://192.168.146.167'; 
+}
 
 class LeaderboardScreen extends StatefulWidget {
+  // Add key parameter
+  const LeaderboardScreen({Key? key}) : super(key: key);
+
   @override
   _LeaderboardScreenState createState() => _LeaderboardScreenState();
 }
@@ -12,6 +21,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   bool isLoading = true;
   bool isError = false;
   TextEditingController searchController = TextEditingController();
+  int currentUserRank = 0;
+  int currentUserXp = 0;
 
   List<dynamic> get filteredLeaderboard {
     final query = searchController.text.toLowerCase();
@@ -27,30 +38,63 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   Future<void> fetchLeaderboard() async {
-    final url = Uri.parse('http://192.168.146.167:5000/api/leaderboard');
+    final url = Uri.parse('${ApiConstants.baseUrl}/api/leaderboard');
 
-    try {
-      final response = await http.get(url);
-      print("API Response: ${response.body}");
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+    //try {
+      // Get authentication token if needed
+      //final token = await _getAuthToken();
+      
+      // Use the token in headers if needed
+      //final headers = token.isNotEmpty ? {'Authorization': 'Bearer $token'} : {};
+      
+      //final response = await http.get(url, headers: headers);
+      
+    //   if (response.statusCode == 200) {
+    //     final data = json.decode(response.body);
+    //     setState(() {
+    //       leaderboard = data;
+    //       isLoading = false;
+    //       isError = false;
+    //     });
+        
+    //     // Check if current user exists in leaderboard
+    //     _checkCurrentUserRank();
+    //   } else {
+    //     throw Exception('Failed to load leaderboard');
+    //   }
+    // } catch (e) {
+    //   print("Error fetching leaderboard: $e");
+    //   setState(() {
+    //     isLoading = false;
+    //     isError = true;
+    //   });
+   // }
+  }
+
+  // Add this method to check user rank
+  void _checkCurrentUserRank() {
+    String currentUserEmail = FirebaseAuth.instance.currentUser?.email ?? "";
+    
+    for (int i = 0; i < leaderboard.length; i++) {
+      if (leaderboard[i]['email'] == currentUserEmail) {
         setState(() {
-          leaderboard = data;
-          isLoading = false;
-          isError = false;
+          currentUserRank = i + 1;
+          currentUserXp = leaderboard[i]['xp'];
         });
-        print("Total Users: ${leaderboard.length}");
-      } else {
-        throw Exception('Failed to load leaderboard');
+        break;
       }
-    } catch (e) {
-      print("Error fetching leaderboard: $e");
-      setState(() {
-        isLoading = false;
-        isError = true;
-      });
     }
   }
+
+  // Fix return type issue
+//   Future<String> _getAuthToken() async {
+//   User? user = FirebaseAuth.instance.currentUser;
+//   if (user != null) {
+//     return await user.getIdToken() ?? ''; // Return empty string if null
+//   }
+//   return '';
+// }
+
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +220,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                             Text(
                                               user['username'],
                                               style: TextStyle(
-                                                fontSize: 18,  // Increased font size
+                                                fontSize: 18,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
@@ -184,7 +228,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                             Text(
                                               '${user['xp']} XP',
                                               style: TextStyle(
-                                                fontSize: 16,  // Increased font size
+                                                fontSize: 16,
                                                 color: Colors.grey[700],
                                               ),
                                             ),
@@ -205,7 +249,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  // Updated podium widget without white circles
   Widget _buildPodium(Map<String, dynamic>? user, int rank, String medalImage) {
     final username = user?['username'] ?? 'N/A';
     final xp = user?['xp']?.toString() ?? '0';

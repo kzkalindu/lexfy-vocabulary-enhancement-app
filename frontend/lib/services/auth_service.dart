@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final String _apiUrl = 'http://localhost:3000/api/auth/login';
+  final String _apiUrl = 'http://192.168.146.167/api/auth/login';
 
   Future<void> login(String email, String password) async {
     final response = await http.post(
