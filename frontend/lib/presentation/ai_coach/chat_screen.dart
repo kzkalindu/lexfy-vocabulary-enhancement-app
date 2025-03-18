@@ -631,7 +631,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           child: ColorFiltered(
                             colorFilter: ColorFilter.mode(mainColor, BlendMode.srcIn), // ✅ Apply mainColor
                             child: Image.asset(
-                              'assets/icons/ai_icon.png', // ✅ AI image path
+                              'assets/icons/ai/ai_icon.png', // ✅ AI image path
                               width: 24,
                               height: 24,
                               fit: BoxFit.cover,
