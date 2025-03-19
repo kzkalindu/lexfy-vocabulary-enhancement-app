@@ -53,7 +53,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             userLevel = _userService.user.currentLevel;
             userXp = _userService.user.xpPoints;
-            userRank = _userService.user.rank; // Now String instead of int
+            
+            // Determine rank based on XP
+            if (userXp >= 5000) {
+              userRank = 'Master';
+            } else if (userXp >= 2500) {
+              userRank = 'Expert';
+            } else if (userXp >= 1000) {
+              userRank = 'Pro';
+            } else if (userXp >= 100) {
+              userRank = 'Beginner';
+            } else {
+              userRank = 'Newbie';
+            }
+            
             isLoading = false;
           });
         }
@@ -435,7 +448,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
           ],
         ),
-     ),
-);
-}
+      ),
+    );
+  }
 }

@@ -1,32 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Create ApiConstants class
-class ApiConstants {
-  static const String baseUrl = 'http://192.168.146.167'; 
-}
 
 class LeaderboardScreen extends StatefulWidget {
-  // Add key parameter
-  const LeaderboardScreen({Key? key}) : super(key: key);
+  final String? currentUserName;
+  final int? currentUserXp;
+  final String? currentUserAvatar;
+  final String? currentUserRank;
+  final int? currentUserLevel;
+
+  const LeaderboardScreen({
+    Key? key, 
+    this.currentUserName,
+    this.currentUserXp,
+    this.currentUserAvatar,
+    this.currentUserRank,
+    this.currentUserLevel,
+  }) : super(key: key);
 
   @override
   _LeaderboardScreenState createState() => _LeaderboardScreenState();
 }
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
+  //final UserService _userService = UserService();
   List<dynamic> leaderboard = [];
   bool isLoading = true;
   bool isError = false;
   TextEditingController searchController = TextEditingController();
   int currentUserRank = 0;
   int currentUserXp = 0;
+  String currentUserName = "User";
+  String currentUserAvatar = "assets/images/avatars/avatar1.png";
 
   List<dynamic> get filteredLeaderboard {
     final query = searchController.text.toLowerCase();
-    return leaderboard.where((user) => 
+    return leaderboard.where((user) =>
       user['username'].toLowerCase().contains(query)
     ).toList();
   }
@@ -34,80 +45,158 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   @override
   void initState() {
     super.initState();
+    // Use passed data if available
+    if (widget.currentUserName != null) {
+      currentUserName = widget.currentUserName!;
+    }
+    if (widget.currentUserXp != null) {
+      currentUserXp = widget.currentUserXp!;
+    }
+    if (widget.currentUserAvatar != null) {
+      currentUserAvatar = widget.currentUserAvatar!;
+    }
+    if (widget.currentUserName != null) {
+      currentUserName = widget.currentUserName!;
+    }
+    
+    _initUserAndFetchLeaderboard();
+    _loadSelectedAvatar();
     fetchLeaderboard();
+  }
+  Future<void> _initUserAndFetchLeaderboard() async {
+    try {
+      //await _userService.syncUser(FirebaseAuth.instance.currentUser);
+      await fetchLeaderboard();
+    } catch (e) {
+      print("Error initializing user: $e");
+      setState(() {
+        isError = true;
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadSelectedAvatar() async {
+    // Only load from preferences if not passed as a parameter
+    if (widget.currentUserAvatar == null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        currentUserAvatar = prefs.getString('selectedAvatar') ?? "assets/images/avatars/avatar1.png";
+      });
+    }
   }
 
   Future<void> fetchLeaderboard() async {
-    final url = Uri.parse('${ApiConstants.baseUrl}/api/leaderboard');
+    try {
+      setState(() {
+        isLoading = true;
+        isError = false;
+      });
 
-    //try {
-      // Get authentication token if needed
-      //final token = await _getAuthToken();
-      
-      // Use the token in headers if needed
-      //final headers = token.isNotEmpty ? {'Authorization': 'Bearer $token'} : {};
-      
-      //final response = await http.get(url, headers: headers);
-      
-    //   if (response.statusCode == 200) {
-    //     final data = json.decode(response.body);
-    //     setState(() {
-    //       leaderboard = data;
-    //       isLoading = false;
-    //       isError = false;
-    //     });
-        
-    //     // Check if current user exists in leaderboard
-    //     _checkCurrentUserRank();
-    //   } else {
-    //     throw Exception('Failed to load leaderboard');
-    //   }
-    // } catch (e) {
-    //   print("Error fetching leaderboard: $e");
-    //   setState(() {
-    //     isLoading = false;
-    //     isError = true;
-    //   });
-   // }
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw Exception("Please log in to view the leaderboard.");
+      }
+
+      final QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .orderBy('xpPoints', descending: true)
+          .get();
+
+      if (userSnapshot.docs.isEmpty) {
+        throw Exception("No users found in the database.");
+      }
+
+      final List<dynamic> leaderboardData = userSnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        String rank;
+        int xp = data['xpPoints'] ?? 0;
+
+        if (xp >= 5000) {
+          rank = 'Master';
+        } else if (xp >= 2500) {
+          rank = 'Expert';
+        } else if (xp >= 1000) {
+          rank = 'Pro';
+        } else if (xp >= 100) {
+          rank = 'Beginner';
+        } else {
+          rank = 'Newbie';
+        }
+
+        return {
+          'username': data['displayName'] ?? data['email']?.toString().split('@')[0] ?? 'Unknown',
+          'email': data['email'] ?? '',
+          'xp': xp,
+          'rank': rank,
+          'avatar': data['avatar'] ?? 'assets/images/avatars/avatar1.png',
+          'level': data['currentLevel'] ?? 1,
+        };
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          leaderboard = leaderboardData;
+          isLoading = false;
+          _checkCurrentUserDetails();
+        });
+      }
+    } catch (e) {
+      print("Error fetching leaderboard from Firestore: $e");
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          isError = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
-  // Add this method to check user rank
-  void _checkCurrentUserRank() {
+  void _checkCurrentUserDetails() {
     String currentUserEmail = FirebaseAuth.instance.currentUser?.email ?? "";
     
     for (int i = 0; i < leaderboard.length; i++) {
       if (leaderboard[i]['email'] == currentUserEmail) {
         setState(() {
           currentUserRank = i + 1;
-          currentUserXp = leaderboard[i]['xp'];
+          // Only set these values if they weren't passed in as parameters
+          if (widget.currentUserXp == null) {
+            currentUserXp = leaderboard[i]['xp'];
+          }
+          if (widget.currentUserName == null) {
+            currentUserName = leaderboard[i]['username'];
+          }
         });
         break;
       }
     }
   }
 
-  // Fix return type issue
-//   Future<String> _getAuthToken() async {
-//   User? user = FirebaseAuth.instance.currentUser;
-//   if (user != null) {
-//     return await user.getIdToken() ?? ''; // Return empty string if null
-//   }
-//   return '';
-// }
-
+  Future<void> _refreshLeaderboard() async {
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+        isError = false;
+      });
+    }
+    await fetchLeaderboard();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50],
+      backgroundColor: const Color.fromARGB(255, 250, 243, 255),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 152, 79, 247),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Leaderboard',
           style: TextStyle(
             color: Colors.white,
@@ -115,21 +204,27 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _refreshLeaderboard,
+          ),
+        ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(20),
               ),
               child: TextField(
                 controller: searchController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Search users...',
-                  prefixIcon: Icon(Icons.search, color: Colors.blueGrey),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
@@ -139,121 +234,148 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ),
             ),
           ),
-          Flexible(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : isError
-                    ? Center(
-                        child: Text(
-                          'Failed to load leaderboard. Please try again later.',
-                          style: TextStyle(color: Colors.red, fontSize: 16),
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 208, 179, 252),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildPodium(leaderboard.length > 1 ? leaderboard[1] : null, 2, 'assets/images/profiles/silver.jpg'),
-                                    _buildPodium(leaderboard.isNotEmpty ? leaderboard[0] : null, 1, 'assets/images/profiles/gold.jpg'),
-                                    _buildPodium(leaderboard.length > 2 ? leaderboard[2] : null, 3, 'assets/images/profiles/bronze.jpg'),
-                                  ],
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshLeaderboard,
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : isError
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Failed to load leaderboard.',
+                                style: TextStyle(color: Colors.red, fontSize: 16),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _refreshLeaderboard,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(255, 152, 79, 247),
                                 ),
-                              ],
-                            ),
+                                child: const Text('Try Again'),
+                              ),
+                            ],
                           ),
-                          Flexible(
-                            child: ListView.builder(
-                              itemCount: filteredLeaderboard.length > 3 ? filteredLeaderboard.length - 3 : 0,
-                              itemBuilder: (context, index) {
-                                final adjustedIndex = index + 3;
-                                
-                                if (adjustedIndex >= filteredLeaderboard.length) {
-                                  return SizedBox.shrink();
-                                }
-                                
-                                final user = filteredLeaderboard[adjustedIndex];
-                                
-                                return Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border(
-                                      bottom: BorderSide(color: Colors.grey.shade200, width: 1),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      // Rank with circle
-                                      Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue.shade100,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '#${adjustedIndex + 1}',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.blue.shade800,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(width: 16),
-                                      // User info
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              user['username'],
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              '${user['xp']} XP',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.grey[700],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                        )
+                      : filteredLeaderboard.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No users found.',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            )
+                          : _buildLeaderboardContent(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPodium(Map<String, dynamic>? user, int rank, String medalImage) {
-    final username = user?['username'] ?? 'N/A';
+  Widget _buildLeaderboardContent() {
+    return ListView(
+      children: [
+        if (leaderboard.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 208, 179, 252),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildPodium(leaderboard.length > 1 ? leaderboard[1] : null, 2, 'silver'),
+                _buildPodium(leaderboard.isNotEmpty ? leaderboard[0] : null, 1, 'gold', isFirst: true),
+                _buildPodium(leaderboard.length > 2 ? leaderboard[2] : null, 3, 'bronze'),
+              ],
+            ),
+          ),
+        const SizedBox(height: 16),
+        ...List.generate(
+          filteredLeaderboard.length > 3 ? filteredLeaderboard.length - 3 : 0,
+          (index) {
+            final position = index + 4;
+            final user = filteredLeaderboard[index + 3];
+            final isCurrentUser = user['email'] == FirebaseAuth.instance.currentUser?.email;
+
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: isCurrentUser ? Colors.deepPurple.shade50 : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 30,
+                      child: Text(
+                        '#$position',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage(user['avatar']),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user['username'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isCurrentUser ? Colors.deepPurple : Colors.black,
+                            ),
+                          ),
+                          Text(
+                            'Level ${user['level']} • ${user['xp']} XP • ${user['rank']}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPodium(Map<String, dynamic>? user, int rank, String medalType, {bool isFirst = false}) {
+    final username = user?['username'] ?? '';
     final xp = user?['xp']?.toString() ?? '0';
-    
-    // Determine rank text for the badge
+    final rankTitle = user?['rank'] ?? 'Newbie';
+    final avatar = user?['avatar'] ?? currentUserAvatar;
+    final level = user?['level']?.toString() ?? '1';
+    final isCurrentUser = user != null && user['email'] == FirebaseAuth.instance.currentUser?.email;
+
     String rankText;
     switch (rank) {
       case 1:
@@ -269,49 +391,52 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         rankText = rank.toString();
     }
 
+    final double avatarSize = isFirst ? 80.0 : 70.0;
+    final double badgeSize = isFirst ? 25.0 : 22.0;
+    final Color medalColor = medalType == 'gold'
+        ? Colors.amber
+        : medalType == 'silver'
+            ? Colors.grey.shade400
+            : Colors.brown;
+
     return Column(
       children: [
-        // Medal container with badge
         Stack(
           alignment: Alignment.center,
           children: [
-            // Main medal image - no white circle
             Container(
-              width: 80,
-              height: 80,
+              width: avatarSize,
+              height: avatarSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage(medalImage),
+                  image: AssetImage(avatar),
                   fit: BoxFit.cover,
+                ),
+                border: Border.all(
+                  color: medalColor,
+                  width: 3,
                 ),
               ),
             ),
-            
-            // Rank badge
             Positioned(
               top: 0,
               right: 0,
               child: Container(
-                width: 25,
-                height: 25,
+                width: badgeSize,
+                height: badgeSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
+                  color: medalColor,
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
                 child: Center(
                   child: Text(
                     rankText,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: isFirst ? 12 : 10,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -319,15 +444,29 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
           ],
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 8),
         Text(
-          username, 
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          username,
+          style: TextStyle(
+            fontSize: isFirst ? 16 : 14,
+            fontWeight: FontWeight.bold,
+            color: isCurrentUser ? Colors.deepPurple : Colors.black,
+          ),
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          '$xp XP', 
-          style: TextStyle(color: Colors.grey[700]),
+          '$xp XP',
+          style: TextStyle(
+            fontSize: isFirst ? 14 : 12,
+            color: Colors.grey[700],
+          ),
+        ),
+        Text(
+          '$rankTitle • Level $level',
+          style: TextStyle(
+            fontSize: isFirst ? 14 : 12,
+            color: Colors.grey[600],
+          ),
         ),
       ],
     );
