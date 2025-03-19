@@ -21,6 +21,7 @@ class UserService {
         xpPoints: 0,
         rank: 'Newbie',
         completedLevels: const [1],
+       
       );
       await _firestore.collection('users').doc(_user.uid).set(_user.toJson());
     } else {

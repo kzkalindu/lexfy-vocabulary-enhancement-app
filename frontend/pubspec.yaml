@@ -84,6 +84,9 @@ flutter:
     - assets/icons/ai/ai_icon.png
     - assets/images/profiles/female.jpg
     - assets/images/profiles/male.jpg
+    - assets/images/profiles/silver.jpg
+    - assets/images/profiles/gold.jpg
+    - assets/images/profiles/bronze.jpg
     - assets/images/other/cute-penguin.png
 
 
