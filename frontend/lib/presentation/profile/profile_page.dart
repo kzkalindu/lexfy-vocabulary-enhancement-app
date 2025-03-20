@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     
     // Replace with your actual API endpoint
-    final String apiUrl = "https://172.20.10.6:5001'/api/user/$email";
+    //final String apiUrl = "https://172.20.10.6:5001'/api/user/$email";
 
     try {
       User? user = FirebaseAuth.instance.currentUser;
