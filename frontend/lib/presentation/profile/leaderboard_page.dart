@@ -38,6 +38,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   final String silverMedalAsset = "assets/images/profiles/silver.jpg";
   final String bronzeMedalAsset = "assets/images/profiles/bronze.jpg";
 
+  // Theme color - using the specified color code
+  final Color primaryColor = const Color(0xFF673AB7);
+
   List<dynamic> get filteredLeaderboard {
     final query = searchController.text.toLowerCase();
     return leaderboard.where((user) =>
@@ -199,9 +202,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 243, 255),
+      backgroundColor: const Color(0xFFF5F0FA), // Lighter shade of purple as background
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 152, 79, 247),
+        backgroundColor: primaryColor, // Using the 0xFF673AB7 color
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -233,11 +236,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ),
               child: TextField(
                 controller: searchController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search users...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  prefixIcon: Icon(Icons.search, color: primaryColor.withOpacity(0.6)),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 onChanged: (value) {
                   setState(() {});
@@ -248,8 +251,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshLeaderboard,
+              color: primaryColor,
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator(color: primaryColor))
                   : isError
                       ? Center(
                           child: Column(
@@ -263,7 +267,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               ElevatedButton(
                                 onPressed: _refreshLeaderboard,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(255, 152, 79, 247),
+                                  backgroundColor: primaryColor,
                                 ),
                                 child: const Text('Try Again'),
                               ),
@@ -294,7 +298,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 208, 179, 252),
+              color: primaryColor.withOpacity(0.15), // Lighter shade of primary color
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -318,7 +322,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
-                color: isCurrentUser ? Colors.deepPurple.shade50 : Colors.white,
+                color: isCurrentUser ? primaryColor.withOpacity(0.1) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -360,8 +364,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                   user['username'],
                                   style: TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: isCurrentUser ? Colors.deepPurple : Colors.black,
+                                    fontWeight: FontWeight.bold, 
+                                    color: isCurrentUser ? primaryColor : Colors.black,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -374,10 +378,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     const SizedBox(width: 10),
                     Text(
                       '${user['xp']} XP',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
+                        color: primaryColor,
                       ),
                     ),
                   ],
@@ -456,7 +460,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isCurrentUser ? Colors.deepPurple : Colors.black,
+              color: isCurrentUser ? primaryColor : Colors.black,
             ),
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -465,10 +469,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           // XP
           Text(
             '$xp XP',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
+              color: primaryColor,
             ),
           ),
         ],
