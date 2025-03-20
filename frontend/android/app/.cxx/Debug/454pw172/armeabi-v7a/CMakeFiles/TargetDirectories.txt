@@ -1,0 +1,2 @@
+C:/Users/user/Desktop/IIT 2nd Year/2nd Sem/SDGP/3 and this one/lexfy-vocabulary-enhancement-app/frontend/android/app/.cxx/Debug/454pw172/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/user/Desktop/IIT 2nd Year/2nd Sem/SDGP/3 and this one/lexfy-vocabulary-enhancement-app/frontend/android/app/.cxx/Debug/454pw172/armeabi-v7a/CMakeFiles/rebuild_cache.dir
