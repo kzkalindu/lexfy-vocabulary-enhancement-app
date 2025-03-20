@@ -27,7 +27,7 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   // ✅ Fetch topics from backend
   Future<void> _fetchTopics() async {
     try {
-      const String backendUrl = "http://172.20.10.6:5001/api/topics/data"; // Change IP if needed
+      const String backendUrl = "https://lexfy-vocabulary-enhancement-app.onrender.com/api/topics/data"; // Change IP if needed
       final response = await http.get(Uri.parse(backendUrl));
 
       if (response.statusCode == 200) {

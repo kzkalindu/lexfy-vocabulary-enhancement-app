@@ -33,7 +33,7 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
 
   // Backend URL
 
-  final String backendUrl = 'http://localhost:5000/api/learning/videos';
+  final String backendUrl = 'https://lexfy-vocabulary-enhancement-app.onrender.com/api/learning/videos';
 
   // Number of requests to make to ensure variety
   final int numberOfRequests =

@@ -101,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void _connectWebSocket() {
-    String serverIp = "172.20.10.6";
+    String serverIp = "https://lexfy-vocabulary-enhancement-app.onrender.com";
     String wsUrl = "ws://$serverIp:5001";
     print("Connecting to WebSocket: $wsUrl");
 
