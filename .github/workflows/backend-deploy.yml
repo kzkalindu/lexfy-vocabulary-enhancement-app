@@ -1,0 +1,45 @@
+ name: Deploy Backend to Render
+
+# Trigger the workflow on push to the main branch, only for backend changes
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+# Define the jobs
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Use Ubuntu as the runner
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22' 
+
+      # Step 3: Install backend dependencies
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
+
+      # Step 4: Build backend (optional, only if you have a build step)
+      - name: Build backend
+        working-directory: ./backend
+        run: npm run build  # Remove or adjust if no build step exists
+
+      # Step 5: Trigger Render deployment
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          curl -X POST \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          -H "Content-Type: application/json" \
+          https://api.render.com/v1/services/srv-cvdpgvpc1ekc73e8eah0/deploys
