@@ -1015,8 +1015,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   String currentUserAvatar = "assets/images/avatars/avatar1.png";
 
   // Backend API URL
- final String backendUrl = "https://lexfy-vocabulary-enhancement-app.onrender.com";
- //final response = await http.get(Uri.parse('$backendUrl/api/leaderboard'));
+  final String backendUrl = "https://lexfy-vocabulary-enhancement-app.onrender.com/api/leaderboard";
+  //final response = await http.get(Uri.parse('$backendUrl/api/leaderboard'));
   // Medal image assets
   final String goldMedalAsset = "assets/images/profiles/gold.jpg";
   final String silverMedalAsset = "assets/images/profiles/silver.jpg";

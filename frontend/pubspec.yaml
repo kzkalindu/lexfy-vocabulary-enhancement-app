@@ -132,7 +132,7 @@ flutter_native_splash:
   android: true
   ios: true
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/logos/app icon.png"
