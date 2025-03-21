@@ -213,7 +213,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _speakText(String text) async {
-    final url = Uri.parse('https://172.20.10.6:3000/api/tts'); // Replace with your actual backend URL
+    final url = Uri.parse('https://lexfy-vocabulary-enhancement-app.onrender.com/api/tts'); // Replace with your actual backend URL
 
     try {
       final response = await http.post(
