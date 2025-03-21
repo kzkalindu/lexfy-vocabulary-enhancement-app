@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontend/services/user_service.dart';
 import 'leaderboard_page.dart';
+import 'help_support_screen.dart';
+import 'privacy_screen.dart';
 
 // Global variables
 String userEmail = "";
@@ -22,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String selectedAvatar = "assets/images/avatars/avatar1.png";
   bool isLoading = false;
   final UserService _userService = UserService();
+  final Color primaryColor = const Color(0xFF673AB7);
   
   @override
   void initState() {
@@ -56,7 +59,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             userLevel = _userService.user.currentLevel;
             userXp = _userService.user.xpPoints;
-            userRank = _userService.user.rank; // Now String instead of int
+            
+            // Determine rank based on XP
+            if (userXp >= 5000) {
+              userRank = 'Master';
+            } else if (userXp >= 2500) {
+              userRank = 'Expert';
+            } else if (userXp >= 1000) {
+              userRank = 'Pro';
+            } else if (userXp >= 100) {
+              userRank = 'Beginner';
+            } else {
+              userRank = 'Newbie';
+            }
+            
             isLoading = false;
           });
         }
@@ -139,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: selectedAvatar == avatarPath ? Colors.deepPurple : Colors.transparent,
+            color: selectedAvatar == avatarPath ? primaryColor : Colors.transparent,
             width: 3,
           ),
         ),
@@ -168,7 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 250, 243, 255),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 152, 79, 247),
+        backgroundColor: primaryColor,
         elevation: 0,
         title: Text(
           'Profile',
@@ -194,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 152, 79, 247),
+                    color: primaryColor,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(30),
                       bottomRight: Radius.circular(30),
@@ -228,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 onTap: _showAvatarSelectionDialog,
                                 child: Icon(
                                   Icons.edit,
-                                  color: Colors.deepPurple,
+                                  color: primaryColor,
                                   size: 20,
                                 ),
                               ),
@@ -267,7 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                          color: primaryColor,
                         ),
                       ),
                       SizedBox(height: 15),
@@ -278,7 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               'Level',
                               userLevel.toString(),
                               Icons.trending_up,
-                              Colors.deepPurple,
+                              primaryColor,
                             ),
                           ),
                           SizedBox(width: 15),
@@ -315,7 +331,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: primaryColor,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -350,7 +366,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                          color: primaryColor,
                         ),
                       ),
                       SizedBox(height: 15),
@@ -358,12 +374,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildSettingsOption(
                         'Privacy',
                         Icons.lock,
-                        () {},
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PrivacyScreen()),
+                          );
+                        },
                       ),
                       _buildSettingsOption(
                         'Help & Support',
                         Icons.help,
-                        () {},
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HelpSupportScreen()),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -425,7 +451,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.deepPurple, size: 22),
+            Icon(icon, color: primaryColor, size: 22),
             SizedBox(width: 15),
             Text(
               title,
@@ -438,7 +464,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
           ],
         ),
-     ),
-);
-}
+      ),
+    );
+  }
 }
