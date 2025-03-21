@@ -1,0 +1,9 @@
+export default {
+    XP_CORRECT_ANSWER: 10,
+    XP_WRONG_ANSWER: 2,
+    XP_PASS_LEVEL: 50,
+    RANKS_NEWBIE_XP: 0,
+    RANKS_LEARNER_XP: 500,
+    RANKS_EXPERT_XP: 1500,
+    RANKS_MASTER_XP: 3000,
+  };
