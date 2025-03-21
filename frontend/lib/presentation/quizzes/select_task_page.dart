@@ -28,7 +28,7 @@ class _SelectTaskPageState extends State<SelectTaskPage> {
       await _userService.syncUser(auth.FirebaseAuth.instance.currentUser);
       if (mounted) {
         setState(() {
-          _currentLevel = _userService.user.currentLevel;
+          _currentLevel = _userService.user!.currentLevel;
           _isLoading = false;
         });
       }

@@ -57,8 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
         if (mounted) {
           setState(() {
-            userLevel = _userService.user.currentLevel;
-            userXp = _userService.user.xpPoints;
+            userLevel = _userService.user!.currentLevel;
+            userXp = _userService.user!.xpPoints;
             
             // Determine rank based on XP
             if (userXp >= 5000) {
