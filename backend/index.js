@@ -6,6 +6,7 @@ import { initializeWebSocketServer } from './src/config/websocket.js';
 import { router as learningRoutes } from './src/routes/learning.routes.js';
 import { router as wordRoutes } from './src/routes/word.routes.js';
 import dotenv from 'dotenv';
+import leaderboardRoutes from './src/routes/leaderboardRoutes.js';
 
 dotenv.config();
 
@@ -27,6 +28,14 @@ app.use('/api/words', wordRoutes);
 
 // Routes for Topics
 app.use('/api/topics', topicRoutes);
+
+// API Routes
+app.use('/api/leaderboard', leaderboardRoutes);
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: 'Leaderboard API is running' });
+});
 
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
