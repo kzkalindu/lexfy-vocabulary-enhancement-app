@@ -5,7 +5,7 @@ class PrivacyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = const Color(0xFF673AB7);
+    final Color primaryColor = const Color(0xFF636AE8);
     
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 250, 243, 255),

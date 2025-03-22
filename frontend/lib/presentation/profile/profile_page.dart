@@ -495,7 +495,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String selectedAvatar = "assets/images/avatars/avatar1.png";
   bool isLoading = false;
   final UserService _userService = UserService();
+
   final Color primaryColor = const Color(0xFF636AE8); // Changed to 0xFF636AE8
+
 
   @override
   void initState() {
