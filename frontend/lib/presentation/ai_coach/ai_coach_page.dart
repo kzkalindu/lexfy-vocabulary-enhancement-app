@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'chat_screen.dart';
 
 class AiCoachScreenChooseTopic extends StatefulWidget {
@@ -16,18 +17,27 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
   int? _selectedIndex;
   List<Map<String, dynamic>> topics = [];
   late Future<void> _fetchTopicsFuture;
+  String userUID = ''; // Store user UID
 
 
   @override
   void initState() {
     super.initState();
     _fetchTopics();
+    fetchUserUID();
   }
+  void fetchUserUID() {
+    User? user = FirebaseAuth.instance.currentUser; // Get current user from Firebase
+    setState(() {
+      userUID = user?.uid ?? '';  // Assign UID to userUID variable
+    });
 
+    print("User UID in AiCoachScreen: $userUID");  // Debug log to verify UID
+  }
   // ✅ Fetch topics from backend
   Future<void> _fetchTopics() async {
     try {
-      const String backendUrl = "https://lexfy-vocabulary-enhancement-app.onrender.com/api/topics/data"; // Change IP if needed
+      const String backendUrl = "http://lexfy-vocabulary-enhancement-app.onrender.com/api/topics/data"; // Change IP if needed
       final response = await http.get(Uri.parse(backendUrl));
 
       if (response.statusCode == 200) {
@@ -48,18 +58,26 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
         _selectedIndex = (topics..shuffle()).indexOf(topics.first);
       });
 
-      _navigateToChat(topics[_selectedIndex!]["name"]);
+      _navigateToChat(topics[_selectedIndex!]["name"], userUID);
     }
   }
 
-  void _navigateToChat(String topic) {
+  void _navigateToChat(String topic, String UID) {
+    if (userUID == null) {
+      print("❌ User UID is null. Cannot navigate to ChatScreen.");
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatScreen(topic: topic),
+        builder: (context) => ChatScreen(userUID: userUID!, topic: topic),
       ),
     );
+
+    print("✅ Navigating to ChatScreen with UID: $userUID and Topic: $topic");
   }
+
 
   Widget _buildTopicCard({
     required String title,
@@ -207,7 +225,7 @@ class _AiCoachScreenChooseTopicState extends State<AiCoachScreenChooseTopic> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _selectedIndex != null
-                              ? () => _navigateToChat(topics[_selectedIndex!]["name"])
+                              ? () => _navigateToChat(topics[_selectedIndex!]["name"], userUID)
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _selectedIndex != null

@@ -9,10 +9,11 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 
+
 class ChatScreen extends StatefulWidget {
   final String topic;
-
-  const ChatScreen({Key? key, required this.topic}) : super(key: key);
+  final String userUID;
+  const ChatScreen({Key? key, required this.topic, required this.userUID,}) : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -36,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   String? _currentUserMessage;
   bool _isProcessingMessage = false;
   final List<String> _suggestedResponses = [];
+
 
   @override
   void initState() {
@@ -100,18 +102,32 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _flutterTts.setPitch(1.0);
   }
 
+  void _endConversation() {
+    print("🔚 Ending conversation and navigating back to topic selection...");
+
+    if (_channel != null) {
+      _channel.sink.close(); // ✅ Ensure WebSocket is closed before navigating
+    }
+
+    if (!mounted) return;
+
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
+
   void _connectWebSocket() {
     String serverIp = "lexfy-vocabulary-enhancement-app.onrender.com";
-    String wsUrl = "ws://$serverIp:5001";
+    String wsUrl = "ws://$serverIp";
     print("Connecting to WebSocket: $wsUrl");
 
     _channel = IOWebSocketChannel.connect(wsUrl);
 
-    // Send topic to backend
     _channel.sink.add(jsonEncode({
       "event": "setTopic",
       "topic": widget.topic,
+      "userUID": widget.userUID,  // Include the user UID here
     }));
+
 
     _channel.stream.listen((message) {
       try {
@@ -122,6 +138,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           final text = decodedMessage["text"] as String;
           final role = decodedMessage["role"] as String;
           final isComplete = decodedMessage["isComplete"] as bool;
+          final userUID = decodedMessage["userUID"];
+
+          if (!mounted) return; // Prevent setState() after widget disposal
 
           setState(() {
             if (role == "user") {
@@ -130,20 +149,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 stopRecording();
               }
               _currentUserMessage = text;
-
-              messages.add({
-                "role": "user",
-                "text": text,
-              });
-              _suggestedResponses.clear();
+              messages.add({"role": "user", "text": text,  "userUID": userUID});
+              _suggestedResponses.clear(); // Clear suggestions on new user message
             } else if (role == "ai") {
               if (messages.isNotEmpty && messages.last["role"] == "ai") {
                 messages.last["text"] = text;
               } else {
-                messages.add({
-                  "role": "ai",
-                  "text": text,
-                });
+                messages.add({"role": "ai", "text": text,  "userUID": userUID});
               }
 
               if (isComplete) {
@@ -151,14 +163,18 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               }
             }
           });
-
+          print("Updated messages: $messages");
           _scrollToBottom();
-        } else if (event == "suggestions") {
+        }
+        else if (event == "suggestions") {
           final List<dynamic> suggestions = decodedMessage["suggestions"];
+
+          if (!mounted) return; // Prevent setState() after widget disposal
+
           setState(() {
             _suggestedResponses
               ..clear()
-              ..addAll(suggestions.map((s) => s.toString())); // ✅ Show suggestions only after AI responds
+              ..addAll(suggestions.map((s) => s.toString()));
           });
         }
         else if (event == "audio") {
@@ -166,6 +182,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           final audioBytes = base64Decode(audioBase64);
           final audioPlayer = AudioPlayer();
           audioPlayer.play(BytesSource(audioBytes));
+        }
+        else if (event == "end_conversation") {
+          // ✅ Handle end_conversation event properly
+          final message = decodedMessage["message"] as String;
+          print("🔚 Backend instructed to end conversation. Navigating...");
+          _endConversation(); // Call function to close WebSocket and navigate
         }
       } catch (e) {
         print("Error processing message: $e");
@@ -179,6 +201,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
   }
 
+
+
+
+
   Future<void> stopRecording() async {
     try {
       if (!isRecording) return;
@@ -191,13 +217,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       });
 
       await _audioRecorder.stop();
-      _channel.sink.add(jsonEncode({"event": "stop"}));
+      _channel.sink.add(jsonEncode({"event": "stop", "userUID": widget.userUID}));  // Send userUID when stopping
 
       if (_currentUserMessage != null && !_isProcessingMessage) {
         setState(() {
           messages.add({
             "role": "user",
             "text": _currentUserMessage!,
+            "userUID": widget.userUID,  // Add userUID with user message
           });
           _currentUserMessage = null;
           _isProcessingMessage = false;
@@ -213,7 +240,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _speakText(String text) async {
-    final url = Uri.parse('https://lexfy-vocabulary-enhancement-app.onrender.com/api/tts'); // Replace with your actual backend URL
+    final url = Uri.parse('http://lexfy-vocabulary-enhancement-app.onrender.com/api/tts'); // Replace with your actual backend URL
 
     try {
       final response = await http.post(
@@ -275,7 +302,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             if (audioData.isNotEmpty) {
               _channel.sink.add(jsonEncode({
                 "event": "audio",
-                "audio": base64Encode(audioData)
+                "audio": base64Encode(audioData),
+                "userUID": widget.userUID,
               }));
             }
           },
@@ -590,7 +618,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   children: [
                     IconButton(
                       icon: Icon(Icons.arrow_back, color: Colors.grey[800]),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        _endConversation();
+                      },
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -686,7 +716,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               },
             ),
           ),
-
           Container(
             color: Colors.white,
             padding: const EdgeInsets.all(16.0),
@@ -729,6 +758,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  'Say "end conversation" to quit',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -739,9 +776,15 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: conversationStarted ? _buildChatUI() : _buildStartScreen(),
+    return WillPopScope(
+      onWillPop: () async {
+        _endConversation();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: conversationStarted ? _buildChatUI() : _buildStartScreen(),
+      ),
     );
   }
 }

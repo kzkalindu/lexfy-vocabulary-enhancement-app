@@ -19,7 +19,7 @@ async function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function textToSpeech(text, ws) {
+export async function textToSpeech(text, ws = null) {
   try {
     const [response] = await ttsClient.synthesizeSpeech({
       input: { text },
@@ -29,14 +29,19 @@ export async function textToSpeech(text, ws) {
 
     const audioBase64 = response.audioContent.toString("base64");
 
-    ws.send(JSON.stringify({
-      event: "audio",
-      audio: audioBase64,
-    }));
-
-    console.log("🔊 Sent synthesized speech to client.");
+    if (ws) {
+      ws.send(JSON.stringify({
+        event: "audio",
+        audio: audioBase64,
+      }));
+      console.log("🔊 Sent synthesized speech to client via WebSocket.");
+    } else {
+      console.log("🔊 Generated synthesized speech.");
+      return audioBase64;
+    }
   } catch (error) {
     console.error("❌ TTS Error:", error);
+    throw error;
   }
 }
 
@@ -51,11 +56,11 @@ export async function generateSuggestedResponsesWithRetry(aiResponse, roleDescri
         messages: [
           {
             role: "system",
-            content: `You are ${roleDescription}. Generate two brief, natural follow-up responses that a user might say to continue the conversation with you. Each response should be 1-2 sentences and conversational in tone. Format each response as 'User Response 1: "..."' and 'User Response 2: "..."'.`
+            content: `You are ${roleDescription}. Generate two brief, natural follow-up responses that a user might say to continue the conversation with you. Each response should be 1-2 sentences and conversational in tone. Format each response as '"..."' and '"..."'.`
           },
           {
             role: "user",
-            content: `Based on this AI response, generate two alternative user responses:\n${aiResponse}`
+            content: `Based on this AI response, generate two alternative user responses:\n${aiResponse}. The both responses you generate should be responses the user can say to the person described in the role description.`
           }
         ],
         max_tokens: 100,
@@ -92,14 +97,34 @@ export async function generateSuggestedResponsesWithRetry(aiResponse, roleDescri
   }
 }
 
-export async function streamAIResponse(ws, userMessage, currentTopic, userId = "testUser123") {
+export async function streamAIResponse(ws, userMessage, currentTopic, userId) {
   console.log("\n🗣️ User:", userMessage);
+
+  // Check if the user wants to end the conversation
+  if (userMessage.toLowerCase().includes("end conversation") || userMessage.toLowerCase().includes("stop conversation")) {
+    console.log("🔚 Ending conversation as requested by the user.");
+    conversationManager.resetConversation(userId); // Reset the conversation for the user
+    ws.send(JSON.stringify({
+      event: "text",
+      text: "The conversation has been ended as per your request. How can I assist you further?",
+      role: "ai",
+      isComplete: true,
+      userUID: userId // Include userUID in the response
+    }));
+    ws.send(JSON.stringify({
+      event: "end_conversation",
+      message: "Navigating to the first screen of the AI coach part.",
+      userUID: userId // Include userUID in the response
+    }));
+    return;
+  }
 
   // Fetch roleDescription from Firestore based on the current topic
   let roleDescription = "a helpful assistant"; // Default role description
   try {
-    const topicDoc = await db.collection('topics').doc(currentTopic).get();
-    if (topicDoc.exists) {
+    const topicsSnapshot = await db.collection('topics').where('name', '==', currentTopic).get();
+    if (!topicsSnapshot.empty) {
+      const topicDoc = topicsSnapshot.docs[0]; // Get the first matching document
       roleDescription = topicDoc.data().role_description;
     }
   } catch (error) {
@@ -154,7 +179,8 @@ export async function streamAIResponse(ws, userMessage, currentTopic, userId = "
                   event: "text",
                   text: fullResponse,
                   role: "ai",
-                  isComplete: false
+                  isComplete: false,
+                  userUID: userId // Include userUID in the response
                 }));
               }
             }
@@ -174,14 +200,16 @@ export async function streamAIResponse(ws, userMessage, currentTopic, userId = "
 
       ws.send(JSON.stringify({
         event: "suggestions",
-        suggestions: suggestedResponses
+        suggestions: suggestedResponses,
+        userUID: userId // Include userUID in the response
       }));
 
       ws.send(JSON.stringify({
         event: "text",
         text: fullResponse,
         role: "ai",
-        isComplete: true
+        isComplete: true,
+        userUID: userId // Include userUID in the response
       }));
 
       console.log("✅ AI Streaming Complete\n");
@@ -194,19 +222,21 @@ export async function streamAIResponse(ws, userMessage, currentTopic, userId = "
       event: "text",
       text: "Sorry, I encountered an error while processing your request.",
       role: "ai",
-      isComplete: true
+      isComplete: true,
+      userUID: userId // Include userUID in the response
     }));
   }
 }
 
-export async function handleUserSpeech(ws, transcript, currentTopic) {
+export async function handleUserSpeech(ws, transcript, currentTopic, userID) {
   console.log("📝 User Transcription:", transcript);
   ws.send(JSON.stringify({
     event: "text",
     text: transcript,
     role: "user",
-    isComplete: true
+    isComplete: true,
+    userUID: userID // Include userUID in the response
   }));
 
-  await streamAIResponse(ws, transcript, currentTopic);
+  await streamAIResponse(ws, transcript, currentTopic, userID);
 }
