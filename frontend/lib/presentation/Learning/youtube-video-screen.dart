@@ -32,8 +32,8 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
   final Random _random = Random(); // Random number generator
 
   // Backend URL
-
-  final String backendUrl = 'https://lexfy-vocabulary-enhancement-app.onrender.com/api/learning/videos';
+  final String backendUrl =
+      'https://lexfy-vocabulary-enhancement-app.onrender.com/api/learning/videos';
 
   // Number of requests to make to ensure variety
   final int numberOfRequests =
@@ -203,47 +203,48 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
 
       // For testing purposes, add some mock data if the API fails
       final List<Map<String, String>> mockVideos = [
-      {
-        "id": "axYAW7PuSIM",
-        "title":
-        "English study plan - 20-minute daily English learning routine - Marina Mogilko",
-      "thumbnail": "https://img.youtube.com/vi/axYAW7PuSIM/0.jpg",
-      "category": "grammar",
-    },
-      {
-      "id": "2r3wiPc",
-      "title":
-      "Improve your English with this study PLAN: Intermediate to Advanced ",
-      "thumbnail": "https://img.youtube.com/vi/2r3wiPc/0.jpg",
-      "category": "speaking",
-      },
-      {
-      "id": "uPACgfqVVy4",
-      "title":
-      "100 Common English Questions and Answers | How to Ask and Answer Questions in English",
-      "thumbnail": "https://img.youtube.com/vi/uPACgfqVVy4/0.jpg",
-      "category": "writing",
-      },
-      {
-      "id": "BAJMNQXzrgg",
-      "title":
-      "How to improve your English speaking skills FAST (4 simple steps)",
-      "thumbnail": "https://img.youtube.com/vi/BAJMNQXzrgg/0.jpg",
-      "category": "vocabulary",
-      },
-      {
-      "id": "eAGtfIjhP1k",
-      "title":
-      "Plural Nouns Pronunciation - /s/ /z/ or /iz/? (pronounce PERFECTLY every time!) ",
-      "thumbnail": "https://img.youtube.com/vi/eAGtfIjhP1k/0.jpg",
-      "category": "listening",
-      },
-      {
-      "id": "8xgKH00iyt8",
-      "title": "Prepositions Simplified Correct Usage of 'Work In At As For' for English Learners",
-      "thumbnail": "https://img.youtube.com/vi/8xgKH00iyt8/0.jpg",
-      "category": "professional",
-      },
+        {
+          "id": "axYAW7PuSIM",
+          "title":
+              "English study plan - 20-minute daily English learning routine - Marina Mogilko",
+          "thumbnail": "https://img.youtube.com/vi/axYAW7PuSIM/0.jpg",
+          "category": "grammar",
+        },
+        {
+          "id": "2r3wiPc",
+          "title":
+              "Improve your English with this study PLAN: Intermediate to Advanced ",
+          "thumbnail": "https://img.youtube.com/vi/2r3wiPc/0.jpg",
+          "category": "speaking",
+        },
+        {
+          "id": "uPACgfqVVy4",
+          "title":
+              "100 Common English Questions and Answers | How to Ask and Answer Questions in English",
+          "thumbnail": "https://img.youtube.com/vi/uPACgfqVVy4/0.jpg",
+          "category": "writing",
+        },
+        {
+          "id": "BAJMNQXzrgg",
+          "title":
+              "How to improve your English speaking skills FAST (4 simple steps)",
+          "thumbnail": "https://img.youtube.com/vi/BAJMNQXzrgg/0.jpg",
+          "category": "vocabulary",
+        },
+        {
+          "id": "eAGtfIjhP1k",
+          "title":
+              "Plural Nouns Pronunciation - /s/ /z/ or /iz/? (pronounce PERFECTLY every time!) ",
+          "thumbnail": "https://img.youtube.com/vi/eAGtfIjhP1k/0.jpg",
+          "category": "listening",
+        },
+        {
+          "id": "8xgKH00iyt8",
+          "title":
+              "Prepositions Simplified Correct Usage of 'Work In At As For' for English Learners",
+          "thumbnail": "https://img.youtube.com/vi/8xgKH00iyt8/0.jpg",
+          "category": "professional",
+        },
       ];
 
       // Shuffle the mock videos
@@ -493,18 +494,31 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Define your brand colors
+    const Color primaryColor =
+        Color(0xFF5271FF); // Your logo color (adjust as needed)
+    const Color secondaryColor = Color(0xFF3D5AFE);
+    const Color accentColor = Color(0xFF8C9EFF);
+    const Color backgroundColor = Color(0xFFF5F7FF);
+
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
+        backgroundColor: primaryColor,
         title: const Text(
           "Video Learning",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
+        elevation: 0,
       ),
       body: RefreshIndicator(
-        onRefresh:
-            fetchMixedVideos, // Refresh and mix videos on pull-to-refresh
+        color: primaryColor,
+        onRefresh: fetchMixedVideos,
         child: isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: CircularProgressIndicator(color: primaryColor))
             : errorMessage != null
                 ? Center(
                     child: Text(

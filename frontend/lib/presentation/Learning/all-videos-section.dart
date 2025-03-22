@@ -22,6 +22,7 @@ class AllVideosSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF5271FF), // Logo color
             ),
           ),
         ),
@@ -39,6 +40,8 @@ class AllVideosSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 4,
+                shadowColor: Color(0xFF5271FF)
+                    .withOpacity(0.3), // Add a subtle colored shadow
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
