@@ -1,34 +1,43 @@
 import axios from 'axios';
 
-const apiKey = process.env.YOUTUBE_API_KEY;
+// Parse multiple API keys from environment variable
+const apiKeys = process.env.YOUTUBE_API_KEYS.split(',');
+
+// Function to get the next API key
+let currentKeyIndex = 0;
+function getNextApiKey() {
+    const key = apiKeys[currentKeyIndex];
+    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; // Rotate keys
+    return key;
+}
 
 // English learning topics for university students
 const queries = [
-  // Grammar and Language Structure
-  'Advanced English grammar',
-  'English grammar for academic writing',
+    // Grammar and Language Structure
+    'Advanced English grammar',
+    'English grammar for academic writing',
 
-  // Speaking and Communication Skills
-  'English speaking tips for university students',
-  'English pronunciation practice',
-  'Academic presentation skills in English',
+    // Speaking and Communication Skills
+    'English speaking tips for university students',
+    'English pronunciation practice',
+    'Academic presentation skills in English',
 
-  // Listening and Comprehension
-  'English listening practice for advanced learners',
-  'Understanding academic English lectures',
+    // Listening and Comprehension
+    'English listening practice for advanced learners',
+    'Understanding academic English lectures',
 
-  // Writing and Academic Skills
-  'How to write a research paper in English',
-  'Essay writing tips',
-  'Academic vocabulary for essays',
+    // Writing and Academic Skills
+    'How to write a research paper in English',
+    'Essay writing tips',
+    'Academic vocabulary for essays',
 
-  // Vocabulary Building
-  'Advanced English vocabulary for students',
-  'Learn academic English words',
+    // Vocabulary Building
+    'Advanced English vocabulary for students',
+    'Learn academic English words',
 
-  // Soft Skills in English
-  'Email writing skills in English',
-  'Professional communication in English'
+    // Soft Skills in English
+    'Email writing skills in English',
+    'Professional communication in English'
 ];
 
 // Function to get a random query
@@ -42,6 +51,10 @@ const getVideos = async (req, res) => {
     try {
         const selectedQuery = getRandomQuery();
         console.log(`Fetching videos for: ${selectedQuery}`);
+
+        // Get the next API key
+        const apiKey = getNextApiKey();
+        console.log(`Using API key: ${apiKey}`);
 
         const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(selectedQuery)}&type=video&maxResults=10&videoDuration=medium&key=${apiKey}`;
 
@@ -60,4 +73,4 @@ const getVideos = async (req, res) => {
     }
 };
 
-export  { getVideos };
+export { getVideos };
