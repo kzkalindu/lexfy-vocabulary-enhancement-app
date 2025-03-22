@@ -21,42 +21,43 @@ const requestConfig = {
   interimResults: true,
 };
 
-const dummyUserId = "testUser123";
-let currentTopic = null;
-let roleDescription = "a helpful assistant";
-
 export function initializeWebSocketServer(server) {
   const wss = new WebSocketServer({ server });
 
   wss.on("connection", (ws) => {
     console.log("🔗 New WebSocket Connection Established");
     let recognizeStream = null;
+    let currentTopic = null;
+    let roleDescription = "a helpful assistant"; // Default role description
+    let userID = null;
+    let audioPlayer = null;
 
     ws.on("message", async (message) => {
       try {
         const data = JSON.parse(message);
+        userID = data.userUID; // Set userID from the incoming message
 
         if (data.event === "setTopic") {
           const newTopic = data.topic;
 
           if (currentTopic !== newTopic) { // Only reset if the topic is different
-              currentTopic = newTopic;
-              console.log(`📌 Topic Selected: ${currentTopic}`);
+            currentTopic = newTopic;
+            console.log(`📌 Topic Selected: ${currentTopic}`);
 
-              try {
-                const topicsSnapshot = await db.collection('topics').where('name', '==', currentTopic).get();
-                if (!topicsSnapshot.empty) {
-                  const topicDoc = topicsSnapshot.docs[0];
-                  roleDescription = topicDoc.data().role_description;
-                  console.log(`🎭 AI Role Updated: ${roleDescription}`);
+            try {
+              const topicsSnapshot = await db.collection('topics').where('name', '==', currentTopic).get();
+              if (!topicsSnapshot.empty) {
+                const topicDoc = topicsSnapshot.docs[0];
+                roleDescription = topicDoc.data().role_description;
+                console.log(`🎭 AI Role Updated: ${roleDescription}`);
 
-                  conversationManager.initializeConversation(dummyUserId, roleDescription);
-                } else {
-                  console.warn("⚠️ No matching topic found in Firestore.");
-                }
-              } catch (error) {
-                console.error("❌ Firestore Error:", error);
+                conversationManager.initializeConversation(userID, roleDescription);
+              } else {
+                console.warn("⚠️ No matching topic found in Firestore.");
               }
+            } catch (error) {
+              console.error("❌ Firestore Error:", error);
+            }
           }
         }
 
@@ -74,7 +75,7 @@ export function initializeWebSocketServer(server) {
               if (response.results[0]?.isFinal) {
                 const transcript = response.results[0].alternatives[0]?.transcript;
                 if (transcript) {
-                  handleUserSpeech(ws, transcript, currentTopic);
+                  handleUserSpeech(ws, transcript, currentTopic, userID);
                 }
               }
             });
@@ -95,7 +96,23 @@ export function initializeWebSocketServer(server) {
             recognizeStream.end();
             recognizeStream = null;
           }
-          conversationManager.resetConversation(dummyUserId);
+          conversationManager.resetConversation(userID);
+        }
+
+        if (data.event === "reset") {
+          console.log("🔄 Resetting conversation and topic...");
+          currentTopic = null;
+          roleDescription = "a helpful assistant"; // Reset to default role description
+          conversationManager.resetConversation(userID);
+          if (ttsClient) {
+            ttsClient.close();
+            console.log("🛑 Stopping TTS operations...");
+          }
+          if (audioPlayer) {
+            audioPlayer.stop();
+            audioPlayer = null;
+            console.log("🛑 Stopping audio playback...");
+          }
         }
 
       } catch (error) {
@@ -109,7 +126,9 @@ export function initializeWebSocketServer(server) {
         recognizeStream.end();
         recognizeStream = null;
       }
-      conversationManager.resetConversation(dummyUserId);
+      if (userID) {
+        conversationManager.resetConversation(userID);
+      }
     });
 
     ws.on("error", (error) => {

@@ -54,6 +54,7 @@ import { router as learningRoutes } from './src/routes/learning.routes.js';
 import { router as wordRoutes } from './src/routes/word.routes.js';
 import { router as quizRoutes } from './src/routes/quizRoutes.js';
 import { router as userRoutes } from './src/routes/userRoutes.js';
+import { router as ttsRoutes } from './src/routes/ttsRoutes.js';
 import dotenv from 'dotenv';
 import leaderboardRoutes from './src/routes/leaderboardRoutes.js';
 
@@ -71,6 +72,7 @@ app.use('/api/topics', topicRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/tts', ttsRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Lexfy API is running' });
