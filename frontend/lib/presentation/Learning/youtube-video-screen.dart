@@ -496,24 +496,13 @@ class _YouTubeVideoScreenState extends State<YouTubeVideoScreen> {
   Widget build(BuildContext context) {
     // Define your brand colors
     const Color primaryColor =
-        Color(0xFF5271FF); // Your logo color (adjust as needed)
-    const Color secondaryColor = Color(0xFF3D5AFE);
+        Color(0xFF636AE8); // Your logo color (adjust as needed)
+    const Color secondaryColor = Color(0xFF636AE8);
     const Color accentColor = Color(0xFF8C9EFF);
     const Color backgroundColor = Color(0xFFF5F7FF);
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: const Text(
-          "Video Learning",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        elevation: 0,
-      ),
       body: RefreshIndicator(
         color: primaryColor,
         onRefresh: fetchMixedVideos,
