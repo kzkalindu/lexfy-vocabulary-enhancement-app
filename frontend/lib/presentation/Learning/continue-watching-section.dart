@@ -15,6 +15,9 @@ class ContinueWatchingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define your brand colors
+    const Color primaryColor = Color(0xFF5271FF); // Your logo color
+
     // If the list is empty, don't show anything
     if (continueWatchingList.isEmpty) {
       return const SizedBox
@@ -34,11 +37,15 @@ class ContinueWatchingSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF5271FF), // Logo color
                 ),
               ),
               TextButton(
                 onPressed: () => _showAllContinueWatching(context),
-                child: const Text("See all"),
+                child: const Text(
+                  "See all",
+                  style: TextStyle(color: Color(0xFF5271FF)), // Logo color
+                ),
               ),
             ],
           ),
@@ -92,8 +99,8 @@ class ContinueWatchingSection extends StatelessWidget {
                       ),
                       minHeight: 3,
                       backgroundColor: Colors.grey[300],
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.red),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF5271FF)), // Logo color
                     ),
                   ),
                   Positioned(
@@ -161,7 +168,7 @@ class ContinueWatchingSection extends StatelessWidget {
             title: Text(video["title"]),
             subtitle: Text(getRelativeTime(video["timestamp"])),
             trailing: IconButton(
-              icon: const Icon(Icons.close),
+              icon: const Icon(Icons.close, color: Color(0xFF5271FF)),
               onPressed: () {
                 onRemoveVideo(video["id"]);
                 Navigator.pop(context);

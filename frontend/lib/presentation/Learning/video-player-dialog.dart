@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayerDialog extends StatefulWidget {
@@ -35,26 +36,27 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       insetPadding: EdgeInsets.zero,
+      backgroundColor: Colors.black,
       child: OrientationBuilder(
         builder: (context, orientation) {
+          final isLandscape = orientation == Orientation.landscape;
           return Container(
-            width: orientation == Orientation.portrait
-                ? MediaQuery.of(context).size.width
-                : MediaQuery.of(context).size.height,
-            height: orientation == Orientation.portrait
-                ? MediaQuery.of(context).size.width * 9 / 16 +
-                    100 // Add extra height for controls
-                : MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            height: isLandscape
+                ? MediaQuery.of(context).size.height
+                : MediaQuery.of(context).size.width * 9 / 16 +
+                    (_isFullScreen ? 0 : 100),
             child: Column(
               children: [
                 Expanded(
                   child: YoutubePlayer(
                     controller: widget.controller,
                     showVideoProgressIndicator: true,
-                    progressIndicatorColor: Colors.red,
+                    progressIndicatorColor:
+                        const Color(0xFF5271FF), // Logo color
                     progressColors: const ProgressBarColors(
-                      playedColor: Colors.red,
-                      handleColor: Colors.redAccent,
+                      playedColor: Color(0xFF5271FF), // Logo color
+                      handleColor: Color(0xFF5271FF), // Logo color
                     ),
                     onEnded: (metaData) async {
                       await widget.onVideoEnd(widget.videoId);
@@ -62,7 +64,7 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
                     },
                   ),
                 ),
-                if (orientation == Orientation.portrait) _buildControlPanel(),
+                if (!_isFullScreen) _buildControlPanel(),
               ],
             ),
           );
@@ -159,6 +161,42 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
     setState(() {
       _isFullScreen = !_isFullScreen;
     });
-    widget.controller.toggleFullScreenMode();
+
+    if (_isFullScreen) {
+      // Set to landscape orientation
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      // Hide status bar and navigation bar for true fullscreen
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+      // Force the player to take up the entire screen
+      widget.controller.toggleFullScreenMode();
+    } else {
+      // Return to portrait orientation
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      // Show status bar and navigation bar again
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
+
+      // Exit fullscreen mode in the player
+      widget.controller.toggleFullScreenMode();
+    }
+  }
+
+  @override
+  void dispose() {
+    // Reset orientation and UI overlays
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+    super.dispose();
   }
 }
