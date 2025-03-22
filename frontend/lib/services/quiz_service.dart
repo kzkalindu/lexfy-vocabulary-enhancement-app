@@ -37,49 +37,58 @@
 //   }
 // }
 
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:frontend/models/quiz.dart';
 
 class QuizService {
-  final String baseUrl = 'http://lexfy-vocabulary-enhancement-app.onrender.com/api';
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int _mapUserLevelToQuizLevel(int userLevel) {
+    if (userLevel >= 1 && userLevel <= 20) {
+      return 1; // Levels 1-20 use quizzes with level 1
+    } else if (userLevel >= 21 && userLevel <= 40) {
+      return 2; // Levels 21-40 use quizzes with level 2
+    } else if (userLevel >= 41 && userLevel <= 60) {
+      return 3; // Levels 41-60 use quizzes with level 3
+    } else {
+      return 1; // Fallback to level 1 for invalid ranges
+    }
+  }
 
-  Future<List<Quiz>> getQuizzesByLevel(int level) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception('User not authenticated');
-
+  Future<List<Map<String, dynamic>>> getQuizzesByLevel(int userLevel, List<String> usedQuizzes) async {
     try {
-      // Attempt to fetch from backend
-      final token = await user.getIdToken();
-      final response = await http.get(
-        Uri.parse('$baseUrl/quizzes?level=$level'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
+      int quizLevel = _mapUserLevelToQuizLevel(userLevel);
+      print('User Level $userLevel mapped to Quiz Level $quizLevel, excluding used quizzes: $usedQuizzes');
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Quiz.fromJson(json)).toList();
-      } else {
-        throw Exception('Backend fetch failed: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      print('Falling back to Firestore for quizzes: $e');
-      // Fallback to Firestore
-      final snapshot = await _firestore
+      // Fetch all quizzes for the given level without using whereNotIn
+      final snapshot = await FirebaseFirestore.instance
           .collection('quizzes')
-          .where('level', isEqualTo: level)
-          .limit(5)
+          .where('level', isEqualTo: quizLevel)
           .get();
 
       if (snapshot.docs.isEmpty) {
+        print('No quizzes found for Quiz Level $quizLevel');
         return [];
       }
-      return snapshot.docs.map((doc) => Quiz.fromJson(doc.data())).toList();
+
+      // Filter out used quizzes in Dart
+      final availableQuizzes = snapshot.docs
+          .where((doc) => !usedQuizzes.contains(doc.id))
+          .map((doc) => {
+        'id': doc.id,
+        'quiz': Quiz.fromJson(doc.data()),
+      })
+          .toList();
+
+      if (availableQuizzes.isEmpty) {
+        print('No new quizzes available after filtering used quizzes');
+        return [];
+      }
+
+      // Shuffle and take up to 5 quizzes
+      availableQuizzes.shuffle();
+      return availableQuizzes.take(5).toList();
+    } catch (e) {
+      print('Error fetching quizzes for User Level $userLevel: $e');
+      throw e;
     }
   }
 }
