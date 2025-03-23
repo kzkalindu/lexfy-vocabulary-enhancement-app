@@ -89,7 +89,7 @@ flutter:
     - assets/icons/auth/Google.png
     - assets/images/logos/Logo-Purple.png
     - assets/images/logos/Logo-Purple-S.png
-    - assets/images/logos/Logo-White.png
+    - assets/images/logos/logo_white.png
     - assets/icons/ai/ai_icon.png
     - assets/images/profiles/female.jpg
     - assets/images/profiles/male.jpg
@@ -128,7 +128,7 @@ flutter:
 
 flutter_native_splash:
   color: "#636AE8"
-  image: assets/images/logos/Logo-White.png
+  image: assets/images/logos/logo_white.png
   android: true
   ios: true
 

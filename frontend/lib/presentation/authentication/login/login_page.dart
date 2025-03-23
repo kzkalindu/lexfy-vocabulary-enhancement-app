@@ -15,31 +15,89 @@
 //   bool _obscurePassword = true;
 //
 //   Future<void> signInWithGoogle() async {
-//     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-//     final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
-//     final AuthCredential credential = GoogleAuthProvider.credential(
-//       accessToken: googleAuth.accessToken,
-//       idToken: googleAuth.idToken,
-//     );
-//     await _auth.signInWithCredential(credential);
-//     Navigator.pushReplacementNamed(context, '/home');
+//     try {
+//       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+//       if (googleUser == null) {
+//         // User canceled the sign-in
+//         return;
+//       }
+//       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+//       final AuthCredential credential = GoogleAuthProvider.credential(
+//         accessToken: googleAuth.accessToken,
+//         idToken: googleAuth.idToken,
+//       );
+//       await _auth.signInWithCredential(credential);
+//       Navigator.pushReplacementNamed(context, '/home');
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text('Google Sign-In failed: ${e.toString()}'),
+//           backgroundColor: Colors.red,
+//         ),
+//       );
+//     }
 //   }
 //
 //   void signIn() async {
 //     try {
 //       await _auth.signInWithEmailAndPassword(
-//         email: emailController.text,
-//         password: passwordController.text,
+//         email: emailController.text.trim(),
+//         password: passwordController.text.trim(),
 //       );
 //       Navigator.pushReplacementNamed(context, '/home');
+//     } on FirebaseAuthException catch (e) {
+//       String errorMessage;
+//       switch (e.code) {
+//         case 'user-not-found':
+//           errorMessage = 'No user found with this email.';
+//           break;
+//         case 'wrong-password':
+//           errorMessage = 'Incorrect password. Please try again.';
+//           break;
+//         case 'invalid-email':
+//           errorMessage = 'Please enter a valid email address.';
+//           break;
+//         case 'invalid-credential':
+//           errorMessage = 'Invalid credentials. Please check and try again.';
+//           break;
+//         default:
+//           errorMessage = 'Login failed: ${e.message}';
+//       }
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text(errorMessage),
+//           backgroundColor: Colors.red,
+//         ),
+//       );
 //     } catch (e) {
-//       print(e);
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text('An unexpected error occurred: ${e.toString()}'),
+//           backgroundColor: Colors.red,
+//         ),
+//       );
 //     }
 //   }
 //
-//   void continueAsGuest() {
-//     // Navigate to home screen without authentication
-//     Navigator.pushReplacementNamed(context, '/home');
+//   void continueAsGuest() async {
+//     try {
+//       await _auth.signInAnonymously();
+//       Navigator.pushReplacementNamed(context, '/home');
+//     } on FirebaseAuthException catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text('Guest login failed: ${e.message}'),
+//           backgroundColor: Colors.red,
+//         ),
+//       );
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text('An unexpected error occurred: ${e.toString()}'),
+//           backgroundColor: Colors.red,
+//         ),
+//       );
+//     }
 //   }
 //
 //   @override
@@ -222,7 +280,6 @@
 //                 ),
 //               ),
 //               SizedBox(height: 20),
-//               // Guest login text button (more subtle UI)
 //               Center(
 //                 child: TextButton(
 //                   onPressed: continueAsGuest,
@@ -302,7 +359,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
-        // User canceled the sign-in
         return;
       }
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -322,13 +378,36 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void signIn() async {
+  Future<void> signIn() async {
     try {
-      await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      Navigator.pushReplacementNamed(context, '/home');
+
+      // Check if email is verified
+      if (userCredential.user != null) {
+        // Refresh user data to get latest verification status
+        await userCredential.user!.reload();
+        User? updatedUser = _auth.currentUser;
+
+        if (!updatedUser!.emailVerified) {
+          // Send verification email if not verified
+          await updatedUser.sendEmailVerification();
+          await _auth.signOut(); // Sign out the user until they verify
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Please verify your email first. Verification email sent.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return;
+        }
+
+        // If email is verified, proceed to home
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       switch (e.code) {
@@ -346,6 +425,53 @@ class _LoginScreenState extends State<LoginScreen> {
           break;
         default:
           errorMessage = 'Login failed: ${e.message}';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An unexpected error occurred: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> resetPassword() async {
+    if (emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter your email address first'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(email: emailController.text.trim());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password reset email sent. Check your inbox.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No user found with this email.';
+          break;
+        default:
+          errorMessage = 'Error: ${e.message}';
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -485,11 +611,9 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {
-                    // Handle forgot password
-                  },
+                  onPressed: resetPassword,
                   child: Text(
-                    'Forgot Password ?',
+                    'Forgot Password?',
                     style: TextStyle(
                       color: Color(0xFF636AE8),
                       fontWeight: FontWeight.w500,

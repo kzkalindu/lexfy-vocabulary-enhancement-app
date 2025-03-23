@@ -29,7 +29,7 @@ class WelcomeScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 40.0), // Moves the logo more up
                   child: Image.asset(
-                    'assets/images/logos/Logo-White.png',
+                    'assets/images/logos/logo_white.png',
                     height: 60,
                   ),
                 ),

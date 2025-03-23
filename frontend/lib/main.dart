@@ -224,7 +224,7 @@
 //               mainAxisAlignment: MainAxisAlignment.center,
 //               children: [
 //                 Image.asset(
-//                   'assets/images/logos/Logo-White.png',
+//                   'assets/images/logos/logo_white.png',
 //                   width: 220,
 //                   height: 220,
 //                 ),
@@ -477,7 +477,7 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/images/logos/Logo-White.png',
+                  'assets/images/logos/logo_white.png',
                   width: 220,
                   height: 220,
                 ),
