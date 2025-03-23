@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Set the background color to 0xFF636AE8 -->
+    <item android:drawable="@android:color/white" />
     <item>
-        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+        <color android:color="#FF636AE8" />
     </item>
+    <!-- Center the logo -->
     <item>
-        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/logo_white" />
     </item>
 </layer-list>

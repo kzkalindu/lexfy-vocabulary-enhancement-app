@@ -326,7 +326,7 @@
 //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //         children: [
 //           Image.asset(
-//             'assets/images/logos/Logo-White.png',
+//             'assets/images/logos/logo_white.png',
 //             height: 40,
 //           ),
 //           Row(
@@ -1102,7 +1102,7 @@
 //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //         children: [
 //           Image.asset(
-//             'assets/images/logos/Logo-White.png',
+//             'assets/images/logos/logo_white.png',
 //             height: 40,
 //           ),
 //           Row(
@@ -1871,7 +1871,7 @@
 //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //         children: [
 //           Image.asset(
-//             'assets/images/logos/Logo-White.png',
+//             'assets/images/logos/logo_white.png',
 //             height: 40,
 //           ),
 //           Row(
@@ -2717,7 +2717,7 @@ class _QuizPageState extends State<QuizPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Image.asset(
-            'assets/images/logos/Logo-White.png',
+            'assets/images/logos/logo_white.png',
             height: 40,
           ),
           Row(
